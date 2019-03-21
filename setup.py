@@ -1,5 +1,13 @@
 from setuptools import setup, find_packages
 
+extra_test = [
+    'pytest>=4',
+    'pytest-runner>=4',
+    'pytest-cov>=2',
+    'pytest-django>=3',
+]
+extra_dev = extra_test
+
 setup(
     name='django-outer-join',
 
@@ -11,6 +19,11 @@ setup(
         'Django>=1.11',
         'selfhacked-util @ https://github.com/SelfHacked/selfhacked-util/archive/master.zip',
     ],
+
+    extras_require={
+        'test': extra_test,
+        'dev': extra_dev,
+    },
 
     packages=find_packages(),
 
