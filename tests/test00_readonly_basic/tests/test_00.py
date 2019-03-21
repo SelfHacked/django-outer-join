@@ -39,3 +39,4 @@ def test_get_both():
 def test_filter():
     assert set(A.objects.filter(field1=5).values_list('key', flat=True)) == {2}
     assert set(A.objects.filter(field1=6).values_list('key', flat=True)) == {1, 3}
+    assert set(A.objects.filter(field2=10).values_list('key', flat=True)) == {1, 2}

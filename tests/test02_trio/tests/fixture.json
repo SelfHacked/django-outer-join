@@ -1,0 +1,48 @@
+[
+    {
+        "model": "test02_trio.a0",
+        "fields": {
+            "key": 1,
+            "field1": 5,
+            "field2": 10
+        }
+    },
+    {
+        "model": "test02_trio.a0",
+        "fields": {
+            "key": 2,
+            "field1": 5,
+            "field2": 10
+        }
+    },
+    {
+        "model": "test02_trio.a1",
+        "fields": {
+            "key": 1,
+            "field1": 6,
+            "field3": 20
+        }
+    },
+    {
+        "model": "test02_trio.a1",
+        "fields": {
+            "key": 3,
+            "field1": 6,
+            "field3": 30
+        }
+    },
+    {
+        "model": "test02_trio.a2",
+        "fields": {
+            "key": 1,
+            "field3": 40
+        }
+    },
+    {
+        "model": "test02_trio.a2",
+        "fields": {
+            "key": 3,
+            "field3": 50
+        }
+    }
+]

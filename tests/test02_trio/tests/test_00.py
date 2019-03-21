@@ -24,20 +24,20 @@ def test_get_a0():
 
 @pytest.mark.django_db
 def test_get_a1():
-    a = A.objects.get(key=3)  # exists in A1 table only
+    a = A.objects.get(key=3)  # exists in A1 and A2 table only
     assert a.key == 3
     assert a.field1 == 6
     assert a.field2 is None
-    assert a.field3 == 30
+    assert a.field3 == 50
 
 
 @pytest.mark.django_db
-def test_get_both():
-    a = A.objects.get(key=1)  # exists in both tables
+def test_get_trio():
+    a = A.objects.get(key=1)  # exists in all tables
     assert a.key == 1
     assert a.field1 == 6  # overwritten by A1
     assert a.field2 == 10
-    assert a.field3 == 20
+    assert a.field3 == 40  # overwritten by A2
 
 
 @pytest.mark.django_db

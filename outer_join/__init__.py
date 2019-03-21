@@ -124,7 +124,7 @@ class OuterJoin(object):
                 f'{self.first.get_field(name=on).sql} = {model.get_field(name=on).sql}'
                 for on in self.on
             )
-        sql += ')'
+            sql += ')'
         return sql
 
     @_returns(tuple)
