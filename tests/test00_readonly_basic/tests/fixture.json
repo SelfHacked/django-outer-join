@@ -1,0 +1,34 @@
+[
+    {
+        "model": "test00_readonly_basic.a0",
+        "fields": {
+            "key": 1,
+            "field1": 5,
+            "field2": 10
+        }
+    },
+    {
+        "model": "test00_readonly_basic.a0",
+        "fields": {
+            "key": 2,
+            "field1": 5,
+            "field2": 10
+        }
+    },
+    {
+        "model": "test00_readonly_basic.a1",
+        "fields": {
+            "key": 1,
+            "field1": 6,
+            "field3": 20
+        }
+    },
+    {
+        "model": "test00_readonly_basic.a1",
+        "fields": {
+            "key": 3,
+            "field1": 6,
+            "field3": 30
+        }
+    }
+]
