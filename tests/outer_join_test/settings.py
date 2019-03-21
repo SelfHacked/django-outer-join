@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'test00_readonly_basic',
     'test01_readwrite_basic',
     'test02_trio',
+    'test03_multi_on',
 ]
 
 MIDDLEWARE = [
