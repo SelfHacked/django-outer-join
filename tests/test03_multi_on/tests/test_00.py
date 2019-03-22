@@ -1,6 +1,5 @@
 """
 Copied from test00
-Should work exactly the same
 """
 
 import pytest

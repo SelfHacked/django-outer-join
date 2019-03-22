@@ -1,5 +1,5 @@
 """
-Copied from test04 and changed for remove() and clear()
+Copied from test04
 """
 
 import pytest
