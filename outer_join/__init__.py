@@ -170,7 +170,7 @@ class OuterJoin(object):
                             left = f'"{self.parent_alias}"."{lhs_col}"'
                         else:
                             left, lp = compiler._compile_col(
-                                outer_join.model.get_field(column=lhs_col).col,
+                                left_instance.model.get_field(column=lhs_col).col,
                                 select_format=False,
                             )
                             params.extend(lp)
