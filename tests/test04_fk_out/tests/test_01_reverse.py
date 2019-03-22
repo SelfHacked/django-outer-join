@@ -4,7 +4,7 @@ from ..models import A, B, A0, A1
 
 
 # https://docs.djangoproject.com/en/2.1/ref/models/relations/
-# write method to set for related managers:
+# special method to set for related managers:
 # create, add, remove, clear, set (2 cases: change and addition only)
 
 
@@ -19,6 +19,7 @@ def test_select():
 @pytest.mark.django_db
 def test_filter_related():
     assert B.objects.get(a_set__key=1).key == 4
+    assert B.objects.get(a_set__val=200).key == 2
 
 
 @pytest.mark.django_db
@@ -30,10 +31,29 @@ def test_prefetch_related(django_assert_num_queries):
 
 
 @pytest.mark.django_db
+def test_qs_update():
+    B.objects.get(key=4).a_set.update(val=1000)
+    assert A.objects.get(key=1).val == 1000
+    assert A0.objects.get(key=1).val == 100
+    assert A1.objects.get(key=1).val == 1000
+
+
+@pytest.mark.django_db
+def test_qs_delete():
+    B.objects.get(key=2).a_set.all().delete()
+    assert not A.objects.filter(key=2).exists()
+    assert A0.objects.filter(key=2).exists()
+    assert A1.objects.get(key=2).is_deleted is True
+
+
+@pytest.mark.django_db
 def test_add():
     B.objects.get(key=1).a_set.add(A.objects.get(key=1))
     assert A.objects.get(key=1).b.key == 1
+    assert set(B.objects.get(key=1).a_set.values_list('key', flat=True)) == {1}
     assert B.objects.get(key=4).a_set.count() == 0
+    assert A0.objects.get(key=1).b.key == 1
+    assert A1.objects.get(key=1).b.key == 1
 
 
 @pytest.mark.django_db

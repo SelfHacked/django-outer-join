@@ -38,21 +38,24 @@
         "model": "test05_fk_in.a",
         "fields": {
             "key": 1,
-            "b": 4
+            "b": 4,
+            "val": 100
         }
     },
     {
         "model": "test05_fk_in.a",
         "fields": {
             "key": 2,
-            "b": 2
+            "b": 2,
+            "val": 200
         }
     },
     {
         "model": "test05_fk_in.a",
         "fields": {
             "key": 3,
-            "b": 3
+            "b": 3,
+            "val": 300
         }
     }
 ]

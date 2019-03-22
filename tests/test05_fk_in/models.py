@@ -44,3 +44,5 @@ class A(models.Model):
         db_constraint=False,
         null=True,
     )
+
+    val = models.IntegerField()

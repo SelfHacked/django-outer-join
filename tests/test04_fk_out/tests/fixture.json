@@ -31,14 +31,16 @@
         "model": "test04_fk_out.a0",
         "fields": {
             "key": 1,
-            "b": 1
+            "b": 1,
+            "val": 100
         }
     },
     {
         "model": "test04_fk_out.a0",
         "fields": {
             "key": 2,
-            "b": 2
+            "b": 2,
+            "val": 200
         }
     },
     {
@@ -52,7 +54,8 @@
         "model": "test04_fk_out.a1",
         "fields": {
             "key": 3,
-            "b": 3
+            "b": 3,
+            "val": 300
         }
     }
 ]

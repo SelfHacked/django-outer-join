@@ -19,6 +19,8 @@ class A0(models.Model):
         B, related_name='+', on_delete=models.CASCADE,
     )
 
+    val = models.IntegerField()
+
 
 class A1(AbstractDeleteRecord):
     key = models.IntegerField(unique=True)
@@ -27,12 +29,16 @@ class A1(AbstractDeleteRecord):
         null=True,
     )
 
+    val = models.IntegerField(null=True)
+
 
 class A(models.Model):
     key = models.IntegerField(unique=True)
     b = models.ForeignKey(
         B, related_name='a_set', on_delete=models.CASCADE,
     )
+
+    val = models.IntegerField()
 
     is_deleted = models.BooleanField(null=True)
 
