@@ -6,6 +6,8 @@ from outer_join.extra.queryset import exclude_exact
 
 
 class B(models.Model):
+    # This model doesn't need a manual primary key,
+    # but it's easier to provide test fixtures
     key = models.IntegerField(primary_key=True)
 
     val = models.IntegerField()
