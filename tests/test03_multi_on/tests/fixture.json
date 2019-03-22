@@ -1,0 +1,38 @@
+[
+    {
+        "model": "test03_multi_on.a0",
+        "fields": {
+            "key1": 1,
+            "key2": 1,
+            "field1": 5,
+            "field2": 10
+        }
+    },
+    {
+        "model": "test03_multi_on.a0",
+        "fields": {
+            "key1": 1,
+            "key2": 2,
+            "field1": 5,
+            "field2": 10
+        }
+    },
+    {
+        "model": "test03_multi_on.a1",
+        "fields": {
+            "key1": 1,
+            "key2": 1,
+            "field1": 6,
+            "field3": 20
+        }
+    },
+    {
+        "model": "test03_multi_on.a1",
+        "fields": {
+            "key1": 2,
+            "key2": 1,
+            "field1": 6,
+            "field3": 30
+        }
+    }
+]

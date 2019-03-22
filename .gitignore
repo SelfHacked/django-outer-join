@@ -19,5 +19,10 @@ build/
 dist/
 *.egg-info/
 
+# PyTest
+.eggs/
+.pytest_cache/
+.coverage
+
 # Mac
 .DS_Store

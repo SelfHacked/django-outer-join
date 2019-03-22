@@ -1,0 +1,61 @@
+[
+    {
+        "model": "test07_m2m_one.b0",
+        "fields": {
+            "key": 1,
+            "val": 5
+        }
+    },
+    {
+        "model": "test07_m2m_one.b0",
+        "fields": {
+            "key": 2,
+            "val": 10
+        }
+    },
+    {
+        "model": "test07_m2m_one.b0",
+        "fields": {
+            "key": 4,
+            "val": 10
+        }
+    },
+    {
+        "model": "test07_m2m_one.b1",
+        "fields": {
+            "key": 1,
+            "val": 15
+        }
+    },
+    {
+        "model": "test07_m2m_one.b1",
+        "fields": {
+            "key": 3,
+            "val": 20
+        }
+    },
+    {
+        "model": "test07_m2m_one.a",
+        "fields": {
+            "key": 1,
+            "b_set": [4],
+            "val": 100
+        }
+    },
+    {
+        "model": "test07_m2m_one.a",
+        "fields": {
+            "key": 2,
+            "b_set": [2],
+            "val": 200
+        }
+    },
+    {
+        "model": "test07_m2m_one.a",
+        "fields": {
+            "key": 3,
+            "b_set": [3],
+            "val": 300
+        }
+    }
+]
