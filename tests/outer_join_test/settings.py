@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'test02_trio',
     'test03_multi_on',
     'test04_fk_out',
+    'test05_fk_in',
 ]
 
 MIDDLEWARE = [
