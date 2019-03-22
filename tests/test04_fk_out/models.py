@@ -33,7 +33,10 @@ class A1(AbstractDeleteRecord):
 
 
 class A(models.Model):
-    key = models.IntegerField(unique=True)
+    # Manual key must be used for outer-join models with a relation
+    # (except through models in m2m relations that are not used directly)
+    # However, base tables don't have this restriction
+    key = models.IntegerField(primary_key=True)
     b = models.ForeignKey(
         B, related_name='a_set', on_delete=models.CASCADE,
     )
@@ -44,6 +47,9 @@ class A(models.Model):
 
     class Meta:
         managed = False
+        # IMPORTANT: base manager must be specified for any outer-join model with a relation
+        # base manager should not have an initial filter
+        base_manager_name = 'base_objects'
 
     outer_join = WritableOuterJoin(
         A1, A0,
@@ -52,3 +58,4 @@ class A(models.Model):
     objects = outer_join.get_manager(
         filter_initial_queryset=exclude_exact('is_deleted', True),
     )()
+    base_objects = outer_join.get_manager()()

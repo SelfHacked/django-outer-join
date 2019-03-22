@@ -326,7 +326,7 @@ class WritableOuterJoin(OuterJoin):
                 # just create because if something's not in OUTER JOIN, it's not in writable table
                 kwargs = rw.to_dict(kwargs)
                 obj = model._default_manager.create(**kwargs)
-                created_kwargs = rw.to_dict(obj)
+                created_kwargs = outer_join.model.to_dict(obj, raise_unknown_field=False)
                 return outer_join.model.raw(**created_kwargs)
 
             def bulk_create(self, objs, batch_size=None):

@@ -1,3 +1,7 @@
+"""
+Copied from test04
+"""
+
 import pytest
 
 from ..models import A, B, A0, A1
