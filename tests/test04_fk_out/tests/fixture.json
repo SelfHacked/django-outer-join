@@ -1,0 +1,58 @@
+[
+    {
+        "model": "test04_fk_out.b",
+        "fields": {
+            "key": 1,
+            "val": 5
+        }
+    },
+    {
+        "model": "test04_fk_out.b",
+        "fields": {
+            "key": 2,
+            "val": 10
+        }
+    },
+    {
+        "model": "test04_fk_out.b",
+        "fields": {
+            "key": 3,
+            "val": 15
+        }
+    },
+    {
+        "model": "test04_fk_out.b",
+        "fields": {
+            "key": 4,
+            "val": 20
+        }
+    },
+    {
+        "model": "test04_fk_out.a0",
+        "fields": {
+            "key": 1,
+            "b": 1
+        }
+    },
+    {
+        "model": "test04_fk_out.a0",
+        "fields": {
+            "key": 2,
+            "b": 2
+        }
+    },
+    {
+        "model": "test04_fk_out.a1",
+        "fields": {
+            "key": 1,
+            "b": 4
+        }
+    },
+    {
+        "model": "test04_fk_out.a1",
+        "fields": {
+            "key": 3,
+            "b": 3
+        }
+    }
+]
