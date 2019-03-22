@@ -322,13 +322,6 @@ class WritableOuterJoin(OuterJoin):
         rw = outer_join.rw
 
         class WritableOuterJoinQuerySet(queryset_class):
-            def create(self, **kwargs):
-                # just create because if something's not in OUTER JOIN, it's not in writable table
-                kwargs = rw.to_dict(kwargs)
-                obj = model._default_manager.create(**kwargs)
-                created_kwargs = outer_join.model.to_dict(obj, raise_unknown_field=False)
-                return outer_join.model.raw(**created_kwargs)
-
             def bulk_create(self, objs, batch_size=None):
                 # just create because if something's not in OUTER JOIN, it's not in writable table
                 clean_dicts = (
@@ -410,17 +403,20 @@ class WritableOuterJoin(OuterJoin):
         model = outer_join.rw_model
         rw = outer_join.rw
 
-        def save(obj, *args, **kwargs):
-            d = rw.to_dict(obj, raise_unknown_field=False)
+        def save(obj, using=None, *args, **kwargs):
             try:
-                write_obj = model._default_manager.get(**rw.to_dict(d, fields=outer_join.on))
+                write_obj = model._default_manager.get(**rw.to_dict(obj, fields=outer_join.on))
             except model.DoesNotExist:
                 # create new
-                write_obj = model(**rw.to_dict(d, keep_none=False))
+                write_obj = model(**rw.to_dict(obj, keep_none=False, raise_unknown_field=False))
             else:
-                for k, v in d.items():
+                for k, v in rw.to_dict(obj, raise_unknown_field=False).items():
                     setattr(write_obj, k, v)
-            write_obj.save(*args, **kwargs)
+            write_obj.save(using=using, *args, **kwargs)
+
+            # update state of object
+            obj._state.db = using
+            obj._state.adding = False
 
         return save
 

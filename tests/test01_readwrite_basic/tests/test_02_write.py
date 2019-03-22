@@ -10,11 +10,7 @@ def test_create():
         field1=3,
         field3=8,
     )
-    assert a.key == 5
-    assert a.field1 == 3
-    assert a.field2 is None
-    assert a.field3 == 8
-    assert a.is_deleted is False
+    # a is not intended to be used directly
 
     assert not A0.objects.filter(key=5).exists()
     assert A1.objects.filter(key=5).exists()
