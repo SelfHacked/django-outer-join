@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'test05_fk_in',
     'test06_fk_both',
     'test07_m2m_one',
+    'test08_m2m_all',
 ]
 
 MIDDLEWARE = [
