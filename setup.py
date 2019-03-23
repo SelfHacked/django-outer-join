@@ -9,6 +9,11 @@ extra_test = [
 ]
 extra_dev = extra_test
 
+extra_ci = extra_test + [
+    'codecov',
+    'python-coveralls',
+]
+
 setup(
     name='django-outer-join',
 
@@ -24,6 +29,8 @@ setup(
     extras_require={
         'test': extra_test,
         'dev': extra_dev,
+
+        'ci': extra_ci,
     },
 
     packages=find_packages(),
