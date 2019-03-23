@@ -9,11 +9,11 @@ from django.db.models.options import (
 from django.forms import (
     model_to_dict as _model_to_dict,
 )
-from selfhacked.util.func import (
+
+from . import (
+    cached_property,
     returns as _returns,
 )
-
-from . import cached_property
 from .datatypes import (
     ImmutableDict as _ImmutableDict,
 )
