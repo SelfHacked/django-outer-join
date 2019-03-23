@@ -11,6 +11,7 @@ extra_dev = extra_test
 
 extra_ci = extra_test + [
     'codecov',
+    'python-coveralls',
 ]
 
 setup(
