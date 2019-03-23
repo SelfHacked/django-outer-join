@@ -42,7 +42,3 @@ def test_qs_delete():
     assert not B.objects.filter(key=2).exists()
     assert B0.objects.filter(key=2).exists()
     assert B1.objects.get(key=2).is_deleted is True
-
-
-# FIXME issue #3
-del test_filter_related
