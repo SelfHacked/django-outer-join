@@ -170,3 +170,73 @@ See [`test08`](tests/test08_m2m_all/models.py) for example.
 
 For relation fields in base models,
 you can use `related_name='+'` to disable related managers.
+
+## Implementation Details
+
+### `SELECT` statement, without other `JOIN`s
+
+The `FROM` table is extended into `FULL OUTER JOIN` with all base tables.
+
+Outside of the `FROM` clause,
+all columns in the outer-join model is transformed:
+
+* If it exists in only one base model, we use the column from that model;
+* If it exists in multiple models, we convert it into a `COALESCE` call
+    * If `COALESCE` is in the `SELECT` clause, we also apply an alias (`AS`) so that the column name is preserved.
+
+### `SELECT` statement, with other `JOIN`s
+
+Django introduces `JOIN` statements in various occasions,
+notably relation filters (`related_name__field`),
+`select_related`, and M2M queries.
+
+Consider this case:
+
+```sql
+FROM A INNER JOIN B
+```
+
+Where `B` is an outer-join model.
+
+The safest, and probably only logically correct solution is to
+introduce `B` as a subquery.
+This way, we do not need to change anything in the outer query at all.
+
+```sql
+FROM A INNER JOIN (
+    B1 FULL OUTER JOIN B0
+) AS B
+```
+
+There will apparently be performance complications,
+but it's the best solution without changing Django SQL generation significantly.
+
+### `INSERT` statement (`WritableOuterJoin`)
+
+For an `INSERT` statement,
+it logically requires that the record doesn't exist in the `OUTER JOIN` result,
+so it must not exist in the read-write table.
+We simple pass on the statement to the read-write model.
+
+### `UPDATE` statement (`WritableOuterJoin`)
+
+We must first know whether an object is in the read-write table or not,
+before deciding to run `INSERT` OR `UPDATE` on the object.
+
+Whether an object exists or not is determined by querying the `on` column(s).
+
+For objects that don't exist in the read-write table, we insert them;
+otherwise we update them.
+
+If the call is batch, we use batch insert/update.
+
+### `DELETE` statement (`WritableOuterJoin`)
+
+For objects that don't exist in the read-write table; we create them first;
+and then we delete all the objects.
+
+If the call is batch, we update batch insert/delete.
+
+This might sound redundant,
+but it guarantees any custom delete logic in the read-write model is applied to all objects,
+which is especially important for `AbstractDeleteRecord`.
