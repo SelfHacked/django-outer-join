@@ -16,11 +16,11 @@ from django.db.models.sql.datastructures import (
     BaseTable as _BaseTable,
     Join as _Join,
 )
-from selfhacked.util.func import (
+
+from .util import (
+    cached_property,
     returns as _returns,
 )
-
-from .util import cached_property
 from .util.info import (
     ModelInfo as _ModelInfo,
     FieldInfo as _FieldInfo,

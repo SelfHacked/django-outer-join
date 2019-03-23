@@ -23,7 +23,6 @@ setup(
 
     install_requires=[
         'Django>=1.11',
-        'selfhacked-util @ https://github.com/SelfHacked/selfhacked-util/archive/master.zip',
     ],
 
     extras_require={
