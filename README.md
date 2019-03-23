@@ -98,7 +98,7 @@ It is only intended to provide managers and will not be accessible at runtime.
 * `get_manager -> Type[Manager]`
     * `*` (force kwargs, see [PEP 3102](https://www.python.org/dev/peps/pep-3102/))
     * `filter_initial_queryset: Union[QuerySetFilter, Sequence[QuerySetFilter], None]`
-        * `QuerySetFilter` is a function (`Queryset`) -> `QuerySet`. See [`outer_join.extra.queryset`](outer_join/extra/queryset/) for convenience implementations.
+        * `QuerySetFilter` is a function (`Queryset`) -> `QuerySet`. See [`outer_join.extra.queryset`](outer_join/extra/queryset.py) for convenience implementations.
         * When multiple functions are provided, they will be applied in order.
 
 For the model itself, all fields that can be null from an outer join result should have `null=True`.
