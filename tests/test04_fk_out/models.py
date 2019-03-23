@@ -1,6 +1,6 @@
 from django.db import models
 
-from outer_join import WritableOuterJoin
+from outer_join import WritableOuterJoin, OuterJoinInterceptor
 from outer_join.extra.models import AbstractDeleteRecord
 from outer_join.extra.queryset import exclude_exact
 
@@ -11,6 +11,12 @@ class B(models.Model):
     key = models.IntegerField(primary_key=True)
 
     val = models.IntegerField()
+
+    class Meta:
+        base_manager_name = 'objects'
+
+    interceptor = OuterJoinInterceptor()
+    objects = interceptor.get_manager()()
 
 
 class A0(models.Model):

@@ -146,11 +146,13 @@ extra steps must be taken for the outer-join model itself.
 It is thus recommended to always have these set up for all outer-join models,
 in case the models will be used in relations in the future.
 
-See [`test04`](tests/test04_fk_out/models.py) for example.
+At the mean time, these steps must be take on the other side:
 
-Apart from the outer-join model itself,
-relations into it must have `db_constraint=False`,
+1. All related "normal" models must use the `outer_join.OuterJoinInterceptor` class so that sql generation can work correctly. It is similar to use as `OuterJoin` but only takes `queryset` argument.
+2. Relations into it must have `db_constraint=False`,
 because it's not referencing a real table.
+
+See [`test04`](tests/test04_fk_out/models.py) for example.
 
 Relations in the base tables can still be set up the way they are intended.
 

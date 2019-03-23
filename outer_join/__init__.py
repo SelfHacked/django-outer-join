@@ -34,33 +34,9 @@ from .util.typing import (
 )
 
 
-class OuterJoin(object):
-    __ALL: _typing.List['OuterJoin'] = []
-
-    @classmethod
-    def get_instance(
-            cls,
-            *,
-            model: _typing.Type[_models.Model] = None,
-            table_name: str = None,
-    ) -> _typing.Optional['OuterJoin']:
-        for instance in cls.__ALL:
-            if model is not None and model is not instance.model.raw:
-                continue
-            if table_name is not None and table_name != instance.model.table_name:
-                continue
-            return instance
-        return None
-
-    class JoinFieldError(Exception):
-        def __init__(self, model: _ModelInfo, name: str):
-            msg = f"Field {model.raw.__name__}.{name} does not exist in any base model"
-            super().__init__(msg)
-            self.model = model
-            self.name = name
-
+class OuterJoinInterceptor(object):
     @staticmethod
-    def __to_sequence(
+    def _to_sequence(
             item: _typing.Union[_T, _typing.Sequence[_T], None],
             *,
             allow_none: bool,
@@ -80,75 +56,25 @@ class OuterJoin(object):
 
     def __init__(
             self,
-            first: _typing.Type[_models.Model],  # at least one must be provided
-            *base_models: _typing.Type[_models.Model],
+            *,
             queryset: _typing.Type[_models.QuerySet] = None,
-            on: _typing.Union[str, _typing.Sequence[str]],
     ):
         self.__model: _ModelInfo = None
-        self.__base_models = tuple((
-            _ModelInfo(model)
-            for model in (first, *base_models)
-        ))
         self.__queryset_class = queryset
-        self.__on = self.__to_sequence(on, allow_none=False)
 
     @property
     def model(self) -> _ModelInfo:
         return self.__model
 
-    @property
-    def base_models(self) -> _typing.Sequence[_ModelInfo]:
-        return self.__base_models
-
-    @property
-    def first(self) -> _ModelInfo:
-        return self.base_models[0]
-
-    @property
-    def on(self) -> _typing.Sequence[str]:
-        return self.__on
-
     def contribute_to_class(self, model, *args, **kwargs):
         self.__model = _ModelInfo(model)
-        if self.get_instance(model=model) is None:
-            # only store the first
-            self.__ALL.append(self)
-
-    @cached_property
-    def _outer_join_from(self) -> str:
-        sql = f'"{self.first.table_name}"'
-        for model in self.base_models[1:]:
-            sql += f' FULL OUTER JOIN "{model.table_name}" ON ('
-            sql += ' AND '.join(
-                f'{self.first.get_field(name=on).sql} = {model.get_field(name=on).sql}'
-                for on in self.on
-            )
-            sql += ')'
-        return sql
-
-    @_returns(tuple)
-    def _get_fields(self, name: str) -> _typing.Sequence['_FieldInfo']:
-        for model in self.base_models:
-            try:
-                yield model.get_field(name=name)
-            except _ModelInfo.FieldDoesNotExist:
-                continue
 
     @cached_property
     def _compiler_class(self) -> _typing.Type[_SQLCompiler]:
-        outer_join = self
-
-        class OuterJoinSqlCompiler(_SQLCompiler):
-            def _compile_base_table(self, node: _BaseTable, *, select_format):
-                if node.table_name != outer_join.model.table_name:
-                    return super().compile(node, select_format=select_format)
-
-                return outer_join._outer_join_from, []
-
+        class SubquerySqlCompiler(_SQLCompiler):
             def _compile_join(self, node: _Join, *, select_format):
-                left_instance = outer_join.get_instance(table_name=node.parent_alias)
-                right_instance = outer_join.get_instance(table_name=node.table_name)
+                left_instance = OuterJoin.get_instance(table_name=node.parent_alias)
+                right_instance = OuterJoin.get_instance(table_name=node.table_name)
                 if left_instance is None and right_instance is None:
                     return super().compile(node, select_format=select_format)
 
@@ -203,34 +129,12 @@ class OuterJoin(object):
                 sql += ') '
                 return sql, params
 
-            def _compile_col(self, node: _Col, *, select_format):
-                field = node.target
-                if field.model is not outer_join.model.raw:
-                    return super().compile(node, select_format=select_format)
-
-                name = field.name
-                fields = outer_join._get_fields(name)
-                if len(fields) == 0:
-                    raise outer_join.JoinFieldError(outer_join.model, name)
-
-                if len(fields) == 1:
-                    return super().compile(fields[0].col, select_format=select_format)
-
-                sql = _FieldInfo.coalesce(*fields)
-                if select_format:
-                    sql += f' AS {outer_join.model.get_field(name=name).column}'
-                return sql, []
-
             def compile(self, node, select_format=False):
-                if isinstance(node, _BaseTable):
-                    return self._compile_base_table(node, select_format=select_format)
-                elif isinstance(node, _Join):
+                if isinstance(node, _Join):
                     return self._compile_join(node, select_format=select_format)
-                elif isinstance(node, _Col):
-                    return self._compile_col(node, select_format=select_format)
                 return super().compile(node, select_format=select_format)
 
-        return OuterJoinSqlCompiler
+        return SubquerySqlCompiler
 
     @cached_property
     def _query_class(self) -> _typing.Type[_Query]:
@@ -275,7 +179,7 @@ class OuterJoin(object):
             or None
         """
         outer_join = self
-        filter_initial_queryset = self.__to_sequence(filter_initial_queryset, allow_none=True)
+        filter_initial_queryset = self._to_sequence(filter_initial_queryset, allow_none=True)
 
         class OuterJoinModelManager(_models.Manager.from_queryset(outer_join._queryset_class)):
             @_initial_queryset(*filter_initial_queryset)
@@ -289,6 +193,123 @@ class OuterJoin(object):
                 return queryset
 
         return OuterJoinModelManager
+
+
+class OuterJoin(OuterJoinInterceptor):
+    __ALL: _typing.List['OuterJoin'] = []
+
+    @classmethod
+    def get_instance(
+            cls,
+            *,
+            model: _typing.Type[_models.Model] = None,
+            table_name: str = None,
+    ) -> _typing.Optional['OuterJoin']:
+        for instance in cls.__ALL:
+            if model is not None and model is not instance.model.raw:
+                continue
+            if table_name is not None and table_name != instance.model.table_name:
+                continue
+            return instance
+        return None
+
+    class JoinFieldError(Exception):
+        def __init__(self, model: _ModelInfo, name: str):
+            msg = f"Field {model.raw.__name__}.{name} does not exist in any base model"
+            super().__init__(msg)
+            self.model = model
+            self.name = name
+
+    def __init__(
+            self,
+            first: _typing.Type[_models.Model],  # at least one must be provided
+            *base_models: _typing.Type[_models.Model],
+            on: _typing.Union[str, _typing.Sequence[str]],
+            **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.__base_models = tuple((
+            _ModelInfo(model)
+            for model in (first, *base_models)
+        ))
+        self.__on = self._to_sequence(on, allow_none=False)
+
+    @property
+    def base_models(self) -> _typing.Sequence[_ModelInfo]:
+        return self.__base_models
+
+    @property
+    def first(self) -> _ModelInfo:
+        return self.base_models[0]
+
+    @property
+    def on(self) -> _typing.Sequence[str]:
+        return self.__on
+
+    def contribute_to_class(self, model, *args, **kwargs):
+        super().contribute_to_class(model, *args, **kwargs)
+        if self.get_instance(model=model) is None:
+            # only store the first
+            self.__ALL.append(self)
+
+    @cached_property
+    def _outer_join_from(self) -> str:
+        sql = f'"{self.first.table_name}"'
+        for model in self.base_models[1:]:
+            sql += f' FULL OUTER JOIN "{model.table_name}" ON ('
+            sql += ' AND '.join(
+                f'{self.first.get_field(name=on).sql} = {model.get_field(name=on).sql}'
+                for on in self.on
+            )
+            sql += ')'
+        return sql
+
+    @_returns(tuple)
+    def _get_fields(self, name: str) -> _typing.Sequence['_FieldInfo']:
+        for model in self.base_models:
+            try:
+                yield model.get_field(name=name)
+            except _ModelInfo.FieldDoesNotExist:
+                continue
+
+    @cached_property
+    def _compiler_class(self) -> _typing.Type[_SQLCompiler]:
+        outer_join = self
+        base_class = super()._compiler_class
+
+        class OuterJoinSqlCompiler(base_class):
+            def _compile_base_table(self, node: _BaseTable, *, select_format):
+                if node.table_name != outer_join.model.table_name:
+                    return super().compile(node, select_format=select_format)
+
+                return outer_join._outer_join_from, []
+
+            def _compile_col(self, node: _Col, *, select_format):
+                field = node.target
+                if field.model is not outer_join.model.raw:
+                    return super().compile(node, select_format=select_format)
+
+                name = field.name
+                fields = outer_join._get_fields(name)
+                if len(fields) == 0:
+                    raise outer_join.JoinFieldError(outer_join.model, name)
+
+                if len(fields) == 1:
+                    return super().compile(fields[0].col, select_format=select_format)
+
+                sql = _FieldInfo.coalesce(*fields)
+                if select_format:
+                    sql += f' AS {outer_join.model.get_field(name=name).column}'
+                return sql, []
+
+            def compile(self, node, select_format=False):
+                if isinstance(node, _BaseTable):
+                    return self._compile_base_table(node, select_format=select_format)
+                elif isinstance(node, _Col):
+                    return self._compile_col(node, select_format=select_format)
+                return super().compile(node, select_format=select_format)
+
+        return OuterJoinSqlCompiler
 
 
 class WritableOuterJoin(OuterJoin):
