@@ -152,7 +152,9 @@ At the mean time, these steps must be take on the other side:
 2. Relations into it must have `db_constraint=False`,
 because it's not referencing a real table.
 
-See [`test04`](tests/test04_fk_out/models.py) for example.
+See [`test04`](tests/test04_fk_out/models.py),
+[`test05`](tests/test05_fk_in/models.py) and
+[`test06`](tests/test06_fk_both/models.py) for example.
 
 Relations in the base tables can still be set up the way they are intended.
 
