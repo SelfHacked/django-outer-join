@@ -15,5 +15,4 @@ script:
   - cd tests && pytest --cov --cov-report term
 
 after_success:
-  - codecov
   - coveralls
