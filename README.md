@@ -57,10 +57,9 @@ You can think of it as `A1.field1` overwrites `A0.field1` if `A1.field1` is not 
 ## Compatibility
 
 * Python >= 3.6 (because we love type hints)
-* Django >= 1.11
-    * We only test/support Django 2
-    * Most likely works with 1.11, so we allow it in the pip dependency in case someone wants to use
-    * Might work in previous versions of Django, if you are feeling lucky
+* Django >= 2
+    * Note for Django >= 2.2, [the related manager behavior has changed](https://docs.djangoproject.com/en/2.2/ref/models/relations/), and is not yet supported by this package. Please refer to the [2.1](https://docs.djangoproject.com/en/2.1/ref/models/relations/) doc.
+        > Also, if you are using an intermediate model for a many-to-many relationship, then the `add()`, `create()`, `remove()`, and `set()` methods are disabled.
 * PostgreSQL
     * We only test/support Postgres
     * Does not work with sqlite because it doesn't have `OUTER JOIN`

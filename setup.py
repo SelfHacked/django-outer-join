@@ -22,7 +22,7 @@ setup(
     python_requires='>=3.6',
 
     install_requires=[
-        'Django>=1.11',
+        'Django>=2',
     ],
 
     extras_require={
