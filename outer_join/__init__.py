@@ -4,8 +4,14 @@ import django.db.models as _models
 from django.db import (
     connections as _connections,
 )
+from django.db.models import (
+    Lookup as _Lookup,
+)
 from django.db.models.expressions import (
     Col as _Col,
+)
+from django.db.models.lookups import (
+    Exact as _Exact,
 )
 from django.db.models.sql import (
     Query as _Query,
@@ -22,6 +28,10 @@ from returns import (
     returns as _returns,
 )
 
+from .extra.fake_pk import (
+    hyphen_join as _hyphen_join,
+    hyphen_split as _hyphen_split,
+)
 from .util.info import (
     ModelInfo as _ModelInfo,
     FieldInfo as _FieldInfo,
@@ -234,6 +244,7 @@ class OuterJoin(OuterJoinInterceptor):
             for model in (first, *base_models)
         ))
         self.__on = self._to_sequence(on, allow_none=False)
+        self.__pk = None
 
     @property
     def base_models(self) -> _typing.Sequence[_ModelInfo]:
@@ -246,6 +257,49 @@ class OuterJoin(OuterJoinInterceptor):
     @property
     def on(self) -> _typing.Sequence[str]:
         return self.__on
+
+    class MultiplePKDeclared(Exception):
+        pass
+
+    def get_primary_key(
+            self,
+            base_class: _typing.Type[_models.Field] = _models.CharField,
+            *,
+            format_pk: _typing.Callable[[_typing.Tuple], str] = _hyphen_join,
+            parse_pk: _typing.Callable[[str], _typing.Tuple] = _hyphen_split,
+    ):
+        outer_join = self
+
+        def set_pk(field):
+            if outer_join.__pk is not None:
+                raise outer_join.MultiplePKDeclared
+            outer_join.__pk = _FieldInfo(field)
+            pass
+
+        class PKField(base_class):
+            def __init__(self, *args, **kwargs):
+                kwargs['primary_key'] = True
+                super().__init__(*args, **kwargs)
+                self.__format_pk = format_pk
+                self.__parse_pk = parse_pk
+
+            @property
+            def format_pk(self):
+                return self.__format_pk
+
+            @property
+            def parse_pk(self):
+                return self.__parse_pk
+
+            def contribute_to_class(self, *args, **kwargs):
+                super().contribute_to_class(*args, **kwargs)
+                set_pk(self)
+
+        return PKField
+
+    @property
+    def pk(self) -> _FieldInfo:
+        return self.__pk
 
     def contribute_to_class(self, model, *args, **kwargs):
         super().contribute_to_class(model, *args, **kwargs)
@@ -266,7 +320,7 @@ class OuterJoin(OuterJoinInterceptor):
         return sql
 
     @_returns(tuple)
-    def _get_fields(self, name: str) -> _typing.Sequence['_FieldInfo']:
+    def _get_fields(self, name: str) -> _typing.Sequence[_FieldInfo]:
         for model in self.base_models:
             try:
                 yield model.get_field(name=name)
@@ -279,6 +333,16 @@ class OuterJoin(OuterJoinInterceptor):
         base_class = super()._compiler_class
 
         class OuterJoinSqlCompiler(base_class):
+            def get_default_columns(self, *args, **kwargs) -> _typing.List[_Col]:
+                result = super().get_default_columns(*args, **kwargs)
+                if outer_join.pk is not None:
+                    result = [
+                        col
+                        for col in result
+                        if col.field is not outer_join.pk.raw
+                    ]
+                return result
+
             def _compile_base_table(self, node: _BaseTable, *, select_format):
                 if node.table_name != outer_join.model.table_name:
                     return super().compile(node, select_format=select_format)
@@ -303,11 +367,41 @@ class OuterJoin(OuterJoinInterceptor):
                     sql += f' AS {outer_join.model.get_field(name=name).column}'
                 return sql, []
 
+            class PkLookupNotSupported(NotImplementedError):
+                def __init__(self):
+                    super().__init__("Non-exact pk lookup is not supported yet!")
+
+            def _compile_lookup(self, node: _Lookup, *, select_format):
+                if outer_join.pk is None:
+                    return super().compile(node, select_format=select_format)
+                if not isinstance(node.lhs, _Col):
+                    return super().compile(node, select_format=select_format)
+
+                pk = outer_join.pk.raw
+                if node.lhs.field is not pk:
+                    return super().compile(node, select_format=select_format)
+
+                if not isinstance(node, _Exact):
+                    raise self.PkLookupNotSupported
+                expand_lookup = []
+                expand_lookup_params = []
+                for on, val in zip(outer_join.on, pk.parse_pk(node.rhs)):
+                    exact = _Exact(
+                        outer_join.model.get_field(name=on).col,
+                        val,
+                    )
+                    sql, params = self.compile(exact)
+                    expand_lookup.append(sql)
+                    expand_lookup_params.extend(params)
+                return f"(({') AND ('.join(expand_lookup)}))", expand_lookup_params
+
             def compile(self, node, select_format=False):
                 if isinstance(node, _BaseTable):
                     return self._compile_base_table(node, select_format=select_format)
                 elif isinstance(node, _Col):
                     return self._compile_col(node, select_format=select_format)
+                elif isinstance(node, _Lookup):
+                    return self._compile_lookup(node, select_format=select_format)
                 return super().compile(node, select_format=select_format)
 
         return OuterJoinSqlCompiler
