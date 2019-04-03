@@ -139,7 +139,7 @@ Whenever there is a relation that involves a outer-join model, including
 
 extra steps must be taken for the outer-join model itself.
 
-1. The outer-join model must have a manual primary key, with the exception of M2M through models. It could simply be the `on` field. The base models don't have this requirement.
+1. The outer-join model must have a manual primary key, with the exception of M2M through models (see below). It could simply be the `on` field. The base models don't have this requirement.
 2. `base_manager_name` in the meta options must be specified, and it should be generated manager without an initial queryset filter.
 
 It is thus recommended to always have these set up for all outer-join models,
@@ -169,6 +169,45 @@ See [`test08`](tests/test08_m2m_all/models.py) for example.
 
 For relation fields in base models,
 you can use `related_name='+'` to disable related managers.
+
+### Fake Primary Key for Multiple `on` Fields
+
+Sometimes a single primary key for a model that has multiple `on` fields is required,
+e.g. when building an url.
+
+We provide a way to fake a primary key with all the `on` fields.
+
+```python
+outer_join = OuterJoin(
+    ...,
+    on=['a', 'b'],
+)
+primary_key = outer_join.get_primary_key()()
+```
+
+* `get_primary_key -> Type[Field]`
+    * `base_class: Type[Field]`
+        * Default is `CharField`.
+        * You can replace this with a field type, e.g. `SlugField`. However, validation is probably not guaranteed (not tested).
+    * `*`
+    * `format_pk: Callable[[Tuple], str]`
+        * Used to format a pk for objects selected from database.
+        * Default is `outer_join.extra.fake_pk.hyphen_join`.
+        * Format the `on` fields, in the order they are specified, into a primary key.
+        * Do not use default if there are `'-'`s in your `on` fields.
+    * `parse_pk: Callable[[str], Tuple]`
+        * Used to parse pk in a `pk_exact=` lookup.
+        * Default is `outer_join.extra.fake_pk.hyphen_split`.
+        * This function should reverse `format_pk`.
+
+See the `Through` model in [`test08`](tests/test08_m2m_all/models.py) for example.
+
+By default, the primary key will be a `-` joined string of all `on` field values.
+
+The primary key should only be used in `SELECT` statements,
+and only exact lookup (`pk=` or `pk__exact=`) is supported.
+
+It will be populated however for objects selected through other other means.
 
 ## Implementation Details
 
