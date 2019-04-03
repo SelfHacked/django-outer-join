@@ -57,10 +57,7 @@ You can think of it as `A1.field1` overwrites `A0.field1` if `A1.field1` is not 
 ## Compatibility
 
 * Python >= 3.6 (because we love type hints)
-* Django >= 1.11
-    * We only test/support Django 2
-    * Most likely works with 1.11, so we allow it in the pip dependency in case someone wants to use
-    * Might work in previous versions of Django, if you are feeling lucky
+* Django >= 2
 * PostgreSQL
     * We only test/support Postgres
     * Does not work with sqlite because it doesn't have `OUTER JOIN`
