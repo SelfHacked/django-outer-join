@@ -1,6 +1,7 @@
 import typing as _typing
 
-from . import cached_property
+from gimme_cached_property import cached_property
+
 from .typing import (
     KT as _KT,
     VT_co as _VT_co,

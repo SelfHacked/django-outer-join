@@ -1,12 +1,13 @@
 import typing as _typing
+from functools import (
+    wraps as _wraps,
+)
+
 from django.db.models import (
     QuerySet as _QuerySet,
 )
 from django.db.models.manager import (
     BaseManager as _BaseManager,
-)
-from functools import (
-    wraps as _wraps,
 )
 
 QuerySetFilter = _typing.Callable[[_QuerySet], _QuerySet]
