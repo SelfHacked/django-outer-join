@@ -17,7 +17,7 @@ def test_add():
     assert set(B.objects.get(key=1).a_set.values_list('key', flat=True)) == {1}
     assert B.objects.get(key=4).a_set.count() == 0
     assert A0.objects.get(key=1).b.key == 1
-    assert A1.objects.get(key=1).b.key == 1
+    assert A1._base_manager.get(key=1).b.key == 1
 
 
 @pytest.mark.django_db
@@ -28,7 +28,7 @@ def test_create():
     assert A.objects.get(key=5).b.key == 1
     assert set(B.objects.get(key=1).a_set.values_list('key', flat=True)) == {5}
     assert not A0.objects.filter(key=5).exists()
-    assert A1.objects.get(key=5).b.key == 1
+    assert A1._base_manager.get(key=5).b.key == 1
 
 
 @pytest.mark.django_db
