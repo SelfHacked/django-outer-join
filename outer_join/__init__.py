@@ -270,7 +270,7 @@ class OuterJoin(OuterJoinInterceptor):
             *,
             format_pk: _typing.Callable[[_typing.Iterable], str] = _hyphen_join,
             parse_pk: _typing.Callable[[str], _typing.Iterable] = _hyphen_split,
-    ):
+    ) -> _typing.Type[_models.Field]:
         outer_join = self
 
         def set_pk(field):
