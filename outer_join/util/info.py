@@ -1,6 +1,9 @@
 import typing as _typing
 
 import django.db.models as _models
+from django.db.models.base import (
+    ModelBase as _ModelBase,
+)
 from django.db.models.expressions import (
     Col as _Col,
 )
@@ -26,6 +29,21 @@ from .. import (
 class ModelInfo(object):
     def __init__(self, model: _typing.Type[_models.Model]):
         self.__raw = model
+
+    def __eq__(self, other):
+        if isinstance(other, ModelInfo):
+            return self == other.raw
+        if not isinstance(other, (_models.Model, _ModelBase)):
+            return False
+
+        raw = self.raw
+        if raw == other:
+            return True
+
+        if raw._meta.label != other._meta.label:
+            return False
+
+        return True
 
     @property
     def raw(self) -> _typing.Type[_models.Model]:
@@ -122,6 +140,23 @@ class FieldInfo(object):
         if model is None:
             model = ModelInfo(field.model)
         self.__model = model
+
+    def __eq__(self, other):
+        if isinstance(other, FieldInfo):
+            return self == other.raw
+        if not isinstance(other, _models.Field):
+            return False
+
+        raw = self.raw
+        if raw == other:
+            return True
+
+        if self.model != other.model:
+            return False
+        if raw.name != other.name:
+            return False
+
+        return True
 
     @property
     def raw(self) -> _models.Field:

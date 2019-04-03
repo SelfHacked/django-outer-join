@@ -226,7 +226,7 @@ class OuterJoin(OuterJoinInterceptor):
             table_name: str = None,
     ) -> _typing.Optional['OuterJoin']:
         for instance in cls.__ALL:
-            if model is not None and model is not instance.model.raw:
+            if model is not None and instance.model != model:
                 continue
             if table_name is not None and table_name != instance.model.table_name:
                 continue
@@ -273,7 +273,7 @@ class OuterJoin(OuterJoinInterceptor):
             if outer_join.pk is None:
                 outer_join.__pk = _FieldInfo(field)
                 return
-            if field is outer_join.pk.raw:
+            if outer_join.pk == field:
                 return
             raise _errors.MultiplePKDeclared
 
@@ -366,7 +366,7 @@ class OuterJoin(OuterJoinInterceptor):
                     result = [
                         col
                         for col in result
-                        if col.field is not outer_join.pk.raw
+                        if outer_join.pk != col.field
                     ]
                 return result
 
@@ -378,7 +378,7 @@ class OuterJoin(OuterJoinInterceptor):
 
             def _compile_col(self, node: _Col, *, select_format):
                 field = node.target
-                if field.model is not outer_join.model.raw:
+                if outer_join.model != field.model:
                     return super().compile(node, select_format=select_format)
 
                 name = field.name
