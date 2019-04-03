@@ -13,6 +13,9 @@ from django.db.models.expressions import (
 from django.db.models.lookups import (
     Exact as _Exact,
 )
+from django.db.models.query_utils import (
+    DeferredAttribute as _DeferredAttribute,
+)
 from django.db.models.sql import (
     Query as _Query,
 )
@@ -265,8 +268,8 @@ class OuterJoin(OuterJoinInterceptor):
             self,
             base_class: _typing.Type[_models.Field] = _models.CharField,
             *,
-            format_pk: _typing.Callable[[_typing.Tuple], str] = _hyphen_join,
-            parse_pk: _typing.Callable[[str], _typing.Tuple] = _hyphen_split,
+            format_pk: _typing.Callable[[_typing.Iterable], str] = _hyphen_join,
+            parse_pk: _typing.Callable[[str], _typing.Iterable] = _hyphen_split,
     ):
         outer_join = self
 
@@ -291,8 +294,26 @@ class OuterJoin(OuterJoinInterceptor):
             def parse_pk(self):
                 return self.__parse_pk
 
-            def contribute_to_class(self, *args, **kwargs):
-                super().contribute_to_class(*args, **kwargs)
+            @cached_property
+            def _deferred_attribute_class(self):
+                field = self
+
+                class PKDeferredAttribute(object):
+                    def __get__(self, instance, cls=None):
+                        if instance is None:
+                            return self
+                        return field.format_pk((
+                            getattr(instance, outer_join.model.get_field(name=on).column)
+                            for on in outer_join.on
+                        ))
+
+                return PKDeferredAttribute
+
+            def contribute_to_class(self, model, name, *args, **kwargs):
+                super().contribute_to_class(model, name, *args, **kwargs)
+                if isinstance(getattr(model, self.attname), _DeferredAttribute):
+                    # replace the deferred attribute
+                    setattr(model, self.attname, self._deferred_attribute_class())
                 set_pk(self)
 
         return PKField
