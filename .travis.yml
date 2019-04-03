@@ -23,7 +23,7 @@ before_script:
   - cd tests
 
 script:
-  - ./test-migrations.sh
+  - ./test-makemigrations.sh
   - pytest --cov --cov-report term
 
 after_success:
