@@ -133,6 +133,9 @@ class Through(models.Model):
         Through1, Through0,
         on=['a', 'b'],
     )
+
+    primary_key = outer_join.get_primary_key()()
+
     objects = outer_join.get_manager(
         filter_initial_queryset=exclude_exact('is_deleted', True),
     )()
