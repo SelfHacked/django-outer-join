@@ -262,7 +262,7 @@ class OuterJoin(OuterJoinInterceptor):
 
     def get_primary_key(
             self,
-            base_class: _typing.Type[_models.Field] = _models.CharField,
+            base_class: _typing.Type[_models.Field] = _models.TextField,
             *,
             format_pk: _typing.Callable[[_typing.Iterable], str] = _hyphen_join,
             parse_pk: _typing.Callable[[str], _typing.Iterable] = _hyphen_split,
@@ -270,10 +270,12 @@ class OuterJoin(OuterJoinInterceptor):
         outer_join = self
 
         def set_pk(field):
-            if outer_join.__pk is not None:
-                raise _errors.MultiplePKDeclared
-            outer_join.__pk = _FieldInfo(field)
-            pass
+            if outer_join.pk is None:
+                outer_join.__pk = _FieldInfo(field)
+                return
+            if field is outer_join.pk.raw:
+                return
+            raise _errors.MultiplePKDeclared
 
         class PKField(base_class):
             def __init__(self, *args, **kwargs):

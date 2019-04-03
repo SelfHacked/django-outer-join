@@ -188,8 +188,9 @@ primary_key = outer_join.get_primary_key()()
 
 * `get_primary_key -> Type[Field]`
     * `base_class: Type[Field]`
-        * Default is `CharField`.
+        * Default is `TextField`.
         * You can replace this with a field type, e.g. `SlugField`. However, validation is probably not guaranteed (not tested).
+        * `primary_key` is set to `True`. You can only have one primary key field in a model, obviously.
     * `*`
     * `format_pk: Callable[[Tuple], str]`
         * Used to format a pk for objects selected from database.
