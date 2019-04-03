@@ -1,4 +1,7 @@
 import typing as _typing
+from functools import (
+    lru_cache as _lru_cache,
+)
 
 import django.db.models as _models
 from django.db import (
@@ -309,6 +312,14 @@ class OuterJoin(OuterJoinInterceptor):
                     setattr(model, self.attname, self._deferred_attribute_class())
                 set_pk(self)
 
+            @classmethod
+            @_lru_cache(maxsize=None)
+            def get_lookups(cls):
+                result = super().get_lookups()
+                return {
+                    'exact': result['exact'],
+                }
+
         return PKField
 
     @property
@@ -391,8 +402,6 @@ class OuterJoin(OuterJoinInterceptor):
                 if node.lhs.field is not pk:
                     return super().compile(node, select_format=select_format)
 
-                if not isinstance(node, _Exact):
-                    raise _errors.PkLookupNotSupported
                 expand_lookup = []
                 expand_lookup_params = []
                 for on, val in zip(outer_join.on, pk.parse_pk(node.rhs)):

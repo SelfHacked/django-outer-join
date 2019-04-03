@@ -18,8 +18,3 @@ class JoinFieldError(Exception):
 
 class MultiplePKDeclared(Exception):
     pass
-
-
-class PkLookupNotSupported(NotImplementedError):
-    def __init__(self):
-        super().__init__("Non-exact pk lookup is not supported yet!")
