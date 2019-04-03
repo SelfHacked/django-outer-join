@@ -18,6 +18,9 @@ from returns import (
 from .datatypes import (
     ImmutableDict as _ImmutableDict,
 )
+from .. import (
+    errors as _errors,
+)
 
 
 class ModelInfo(object):
@@ -54,10 +57,6 @@ class ModelInfo(object):
         for field in self.fields:
             yield field.column, field
 
-    class FieldDoesNotExist(Exception):
-        def __init__(self, **kwargs):
-            super().__init__(f"{self.__class__.__name__}: {kwargs}")
-
     def get_field(
             self,
             *,
@@ -70,19 +69,19 @@ class ModelInfo(object):
         if name is not None and column is not None:
             field = self.get_field(name=name)
             if field.column != column:
-                raise self.FieldDoesNotExist(name=name, column=column)
+                raise _errors.FieldDoesNotExist(name=name, column=column)
             return field
 
         if name is not None:
             try:
                 return self.__field_name_to_field[name]
             except KeyError:
-                raise self.FieldDoesNotExist(name=name) from None
+                raise _errors.FieldDoesNotExist(name=name) from None
 
         try:
             return self.__db_column_to_field[column]
         except KeyError:
-            raise self.FieldDoesNotExist(column=column) from None
+            raise _errors.FieldDoesNotExist(column=column) from None
 
     @_returns(_ImmutableDict)
     def to_dict(
@@ -103,7 +102,7 @@ class ModelInfo(object):
                 continue
             try:
                 field = self.get_field(name=k)
-            except self.FieldDoesNotExist:
+            except _errors.FieldDoesNotExist:
                 if not raise_unknown_field:
                     continue
                 raise

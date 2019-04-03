@@ -31,6 +31,9 @@ from returns import (
     returns as _returns,
 )
 
+from . import (
+    errors as _errors,
+)
 from .extra.fake_pk import (
     hyphen_join as _hyphen_join,
     hyphen_split as _hyphen_split,
@@ -227,13 +230,6 @@ class OuterJoin(OuterJoinInterceptor):
             return instance
         return None
 
-    class JoinFieldError(Exception):
-        def __init__(self, model: _ModelInfo, name: str):
-            msg = f"Field {model.raw.__name__}.{name} does not exist in any base model"
-            super().__init__(msg)
-            self.model = model
-            self.name = name
-
     def __init__(
             self,
             first: _typing.Type[_models.Model],  # at least one must be provided
@@ -261,9 +257,6 @@ class OuterJoin(OuterJoinInterceptor):
     def on(self) -> _typing.Sequence[str]:
         return self.__on
 
-    class MultiplePKDeclared(Exception):
-        pass
-
     def get_primary_key(
             self,
             base_class: _typing.Type[_models.Field] = _models.CharField,
@@ -275,7 +268,7 @@ class OuterJoin(OuterJoinInterceptor):
 
         def set_pk(field):
             if outer_join.__pk is not None:
-                raise outer_join.MultiplePKDeclared
+                raise _errors.MultiplePKDeclared
             outer_join.__pk = _FieldInfo(field)
             pass
 
@@ -345,7 +338,7 @@ class OuterJoin(OuterJoinInterceptor):
         for model in self.base_models:
             try:
                 yield model.get_field(name=name)
-            except _ModelInfo.FieldDoesNotExist:
+            except _errors.FieldDoesNotExist:
                 continue
 
     @cached_property
@@ -378,7 +371,7 @@ class OuterJoin(OuterJoinInterceptor):
                 name = field.name
                 fields = outer_join._get_fields(name)
                 if len(fields) == 0:
-                    raise outer_join.JoinFieldError(outer_join.model, name)
+                    raise _errors.JoinFieldError(outer_join.model, name)
 
                 if len(fields) == 1:
                     return super().compile(fields[0].col, select_format=select_format)
@@ -387,10 +380,6 @@ class OuterJoin(OuterJoinInterceptor):
                 if select_format:
                     sql += f' AS {outer_join.model.get_field(name=name).column}'
                 return sql, []
-
-            class PkLookupNotSupported(NotImplementedError):
-                def __init__(self):
-                    super().__init__("Non-exact pk lookup is not supported yet!")
 
             def _compile_lookup(self, node: _Lookup, *, select_format):
                 if outer_join.pk is None:
@@ -403,7 +392,7 @@ class OuterJoin(OuterJoinInterceptor):
                     return super().compile(node, select_format=select_format)
 
                 if not isinstance(node, _Exact):
-                    raise self.PkLookupNotSupported
+                    raise _errors.PkLookupNotSupported
                 expand_lookup = []
                 expand_lookup_params = []
                 for on, val in zip(outer_join.on, pk.parse_pk(node.rhs)):
