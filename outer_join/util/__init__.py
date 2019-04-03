@@ -1,9 +1,10 @@
 import typing as _typing
-from django.utils.functional import (
-    cached_property as _cached_property,
-)
 from functools import (
     wraps as _wraps,
+)
+
+from django.utils.functional import (
+    cached_property as _cached_property,
 )
 
 from .typing import (

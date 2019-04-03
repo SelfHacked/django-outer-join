@@ -1,5 +1,6 @@
-import django.db.models as _models
 import typing as _typing
+
+import django.db.models as _models
 from django.db import (
     connections as _connections,
 )
