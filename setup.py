@@ -23,6 +23,8 @@ setup(
 
     install_requires=[
         'Django>=2',
+        'returns-decorator',
+        'gimme_cached_property',
     ],
 
     extras_require={

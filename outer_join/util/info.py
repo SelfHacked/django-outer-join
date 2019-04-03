@@ -10,11 +10,11 @@ from django.db.models.options import (
 from django.forms import (
     model_to_dict as _model_to_dict,
 )
-
-from . import (
-    cached_property,
+from gimme_cached_property import cached_property
+from returns import (
     returns as _returns,
 )
+
 from .datatypes import (
     ImmutableDict as _ImmutableDict,
 )

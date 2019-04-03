@@ -17,11 +17,11 @@ from django.db.models.sql.datastructures import (
     BaseTable as _BaseTable,
     Join as _Join,
 )
-
-from .util import (
-    cached_property,
+from gimme_cached_property import cached_property
+from returns import (
     returns as _returns,
 )
+
 from .util.info import (
     ModelInfo as _ModelInfo,
     FieldInfo as _FieldInfo,
