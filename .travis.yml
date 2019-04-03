@@ -23,7 +23,7 @@ before_script:
   - cd tests
 
 script:
-  - python manage.py makemigrations > .makemigrations && [[ "$(cat .makemigrations)" == "No changes detected" ]]
+  - ./test-migrations.sh
   - pytest --cov --cov-report term
 
 after_success:

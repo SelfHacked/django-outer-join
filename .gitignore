@@ -23,6 +23,7 @@ dist/
 .eggs/
 .pytest_cache/
 .coverage
+.makemigrations
 
 # Mac
 .DS_Store
