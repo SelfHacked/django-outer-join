@@ -128,6 +128,7 @@ for all fields that are not `on`.
 Be careful with objects returned from `create` or calling the class constructor,
 since they will not contain any information from the database,
 even after they have been saved.
+**It is recommended to always re-select the object after a database save call.**
 
 ### Relations
 
@@ -142,7 +143,7 @@ extra steps must be taken for the outer-join model itself.
 1. The outer-join model must have a manual primary key, with the exception of M2M through models (see below). It could simply be the `on` field. The base models don't have this requirement.
 2. `base_manager_name` in the meta options must be specified, and it should be generated manager without an initial queryset filter.
 
-It is thus recommended to always have these set up for all outer-join models,
+**It is thus recommended to always have these set up for all outer-join models**,
 in case the models will be used in relations in the future.
 
 At the mean time, these steps must be take on the other side:
