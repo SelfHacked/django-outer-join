@@ -114,8 +114,19 @@ The first model will be used as read-write, and others will be read-only.
 To make deletions logically work, we provide a convenience class
 `outer_join.extra.models.AbstractDeleteRecord`
 which is an abstract model with a boolean field `is_deleted`
-and overwrites deletion methods.
-The default manager (`objects`) should also have an initial filter.
+and overwrites insertion and deletion methods.
+
+When using this model,
+
+* In the inherited model,
+    If the primary key is not the `on` field in the writable model,
+    `_save_check_fields` needs to be specified.
+    It is implemented this way so that the create methods for the outer join model
+    is not dependent on using `AbstractDeleteRecord`,
+    and vice-versa.
+* In the outer join model,
+    The default manager (`objects`) should also have an initial filter.
+
 See [`test01`](tests/test01_readwrite_basic/models.py) for example.
 
 Because of how `COALESCE` works,
@@ -257,6 +268,11 @@ For an `INSERT` statement,
 it logically requires that the record doesn't exist in the `OUTER JOIN` result,
 so it must not exist in the read-write table.
 We simple pass on the statement to the read-write model.
+
+When using `AbstractDeleteRecord`,
+it will then see if an object is in the table with `is_deleted=True`.
+If yes, delete the object first before attempt to `INSERT`.
+This logic is implemented in `AbstractDeleteRecord`.
 
 ### `UPDATE` statement (`WritableOuterJoin`)
 
