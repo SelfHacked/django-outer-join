@@ -59,3 +59,21 @@ def test_batch_delete():
 
     assert A1._base_manager.get(key=1).is_deleted is True
     assert A1._base_manager.get(key=2).is_deleted is True
+
+
+@pytest.mark.django_db
+def test_delete_bulk_create():
+    A.objects.get(key=2).delete()
+
+    A.objects.bulk_create([
+        A(
+            key=5,
+            field1=3,
+        ),
+        A(
+            key=2,
+            field3=9,
+        ),
+    ])
+
+    assert A.objects.filter(key__in=[5, 2]).count() == 2

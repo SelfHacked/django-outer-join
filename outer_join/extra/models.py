@@ -10,6 +10,7 @@ from ..util.info import (
 )
 from ..util.queryset import (
     initial_queryset as _initial_queryset,
+    QuerySetSplit as _QuerySetSplit,
 )
 
 
@@ -48,13 +49,13 @@ class AbstractDeleteRecord(_models.Model):
         except self.DoesNotExist:
             return
 
-        obj._raw_delete(using=using)
+        obj._base_delete(using=using)
 
     def save(self, *args, **kwargs):
         self._pre_save(*args, **kwargs)
         return super().save(*args, **kwargs)
 
-    def _raw_delete(self, *args, **kwargs):
+    def _base_delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):
@@ -62,6 +63,19 @@ class AbstractDeleteRecord(_models.Model):
         self.save(using=using)
 
     class DeleteRecordQuerySet(_models.QuerySet):
+        def bulk_create(self, objs, batch_size=None):
+            split = _QuerySetSplit(
+                objs,
+                self.model,
+                *self.model._save_check_fields,
+                manager='_base_manager',
+            )
+            split.get_existing_queryset().delete()
+            return super().bulk_create(objs, batch_size=batch_size)
+
+        def _base_delete(self):
+            return super().delete()
+
         def delete(self):
             self.update(is_deleted=True)
 
