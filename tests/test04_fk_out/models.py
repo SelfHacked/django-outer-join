@@ -29,6 +29,8 @@ class A0(models.Model):
 
 
 class A1(AbstractDeleteRecord):
+    _save_check_fields = ('key',)
+
     key = models.IntegerField(unique=True)
     b = models.ForeignKey(
         B, related_name='+', on_delete=models.CASCADE,

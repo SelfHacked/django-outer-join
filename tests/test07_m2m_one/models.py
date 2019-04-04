@@ -12,6 +12,8 @@ class B0(models.Model):
 
 
 class B1(AbstractDeleteRecord):
+    _save_check_fields = ('key',)
+
     key = models.IntegerField(unique=True)
 
     val = models.IntegerField(null=True)

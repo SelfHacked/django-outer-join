@@ -19,6 +19,8 @@ class A1(AbstractDeleteRecord):
     field1 = models.IntegerField(null=True)
     field3 = models.IntegerField(null=True)
 
+    _save_check_fields = ('key',)
+
 
 class A(models.Model):
     key = models.IntegerField(unique=True)

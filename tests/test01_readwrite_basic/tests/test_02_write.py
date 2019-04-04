@@ -99,3 +99,42 @@ def test_delete_a0():
     assert A1._base_manager.get(key=2).is_deleted is True  # create record with is_deleted=True
 
     assert not A.objects.filter(key=2).exists()  # appears deleted
+
+
+@pytest.mark.django_db
+def test_delete_create():
+    a = A.objects.get(key=2)
+    a.delete()
+
+    a_cr = A.objects.create(
+        key=2,
+        field1=100,
+        field3=300,
+    )
+
+    assert A0.objects.filter(key=2).exists()
+    assert A1._base_manager.get(key=2).is_deleted is False
+
+    a_new = A.objects.get(key=2)
+    assert a_new.field1 == 100
+    assert a_new.field2 == 10
+    assert a_new.field3 == 300
+
+
+@pytest.mark.django_db
+def test_delete_save_create():
+    a = A.objects.get(key=2)
+    a.delete()
+
+    a_cr = A(
+        key=2,
+    )
+    a_cr.save()
+
+    assert A0.objects.filter(key=2).exists()
+    assert A1._base_manager.get(key=2).is_deleted is False
+
+    a_new = A.objects.get(key=2)
+    assert a_new.field1 == 5  # value is reset
+    assert a_new.field2 == 10
+    assert a_new.field3 is None  # value is reset

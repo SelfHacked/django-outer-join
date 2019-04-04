@@ -43,3 +43,15 @@ def test_clear():
     # clear should not work without null=True on ForeignKey
     with pytest.raises(AttributeError):
         B.objects.get(key=4).a_set.clear()
+
+
+@pytest.mark.django_db
+def test_qs_delete_create():
+    A.objects.get(key=2).delete()
+    B.objects.get(key=2).a_set.create(
+        key=2,
+    )
+
+    a = A.objects.get(key=2)
+    assert a.key == 2
+    assert a.b.key == 2
