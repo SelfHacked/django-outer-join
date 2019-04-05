@@ -101,15 +101,18 @@ class ModelInfo(object):
         except KeyError:
             raise _errors.FieldDoesNotExist(column=column) from None
 
+    FieldValueDict = _typing.Mapping[str, _typing.Any]
+    Object = _typing.Union[FieldValueDict, _models.Model]
+
     @_returns(_ImmutableDict)
     def to_dict(
             self,
-            obj: _typing.Union[_typing.Mapping[str, _typing.Any], _models.Model],
+            obj: Object,
             *,
             fields: _typing.Collection[str] = None,
             keep_none: bool = True,
             raise_unknown_field: bool = True,
-    ) -> _typing.Mapping[str, _typing.Any]:
+    ) -> FieldValueDict:
         if isinstance(obj, _models.Model):
             obj = _model_to_dict(obj)
 
@@ -127,6 +130,26 @@ class ModelInfo(object):
             if field.is_fk and isinstance(v, _models.Model):
                 v = v.pk
             yield field.column, v
+
+    Objects = _typing.Union[_typing.Iterable[Object], _models.QuerySet]
+
+    def to_dicts(
+            self,
+            objs: Objects,
+            *,
+            fields: _typing.Collection[str] = None,
+            keep_none: bool = True,
+            raise_unknown_field: bool = True,
+    ) -> _typing.Iterator[FieldValueDict]:
+        if isinstance(objs, _models.QuerySet):
+            objs = objs.values(*fields).iterator()
+        for obj in objs:
+            yield self.to_dict(
+                obj,
+                fields=fields,
+                keep_none=keep_none,
+                raise_unknown_field=raise_unknown_field,
+            )
 
 
 class FieldInfo(object):

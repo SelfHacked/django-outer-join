@@ -62,3 +62,17 @@ def test_set_add():
     # add relation 3-2
     assert set(A.objects.get(key=2).b_set.values_list('key', flat=True)) == {2, 3}
     assert set(B.objects.get(key=3).a_set.values_list('key', flat=True)) == {2, 3}
+
+
+@pytest.mark.django_db
+def test_qs_delete_create():
+    B.objects.get(key=1).delete()
+    A.objects.get(key=2).b_set.create(
+        key=1,
+    )
+
+    b = B.objects.get(key=1)
+    assert b.key == 1
+    assert b.val == 5  # value is reset
+    assert set(b.a_set.values_list('key', flat=True)) == {2}
+    assert set(A.objects.get(key=2).b_set.values_list('key', flat=True)) == {1, 2}

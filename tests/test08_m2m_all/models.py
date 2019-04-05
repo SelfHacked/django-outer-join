@@ -12,6 +12,8 @@ class B0(models.Model):
 
 
 class B1(AbstractDeleteRecord):
+    _save_check_fields = ('key',)
+
     key = models.IntegerField(unique=True)
 
     val = models.IntegerField(null=True)
@@ -51,6 +53,8 @@ class A0(models.Model):
 
 
 class A1(AbstractDeleteRecord):
+    _save_check_fields = ('key',)
+
     key = models.IntegerField(unique=True)
 
     val = models.IntegerField(null=True)
@@ -111,6 +115,8 @@ class Through1(AbstractDeleteRecord):
 
 
 class Through(models.Model):
+    _save_check_fields = ('a', 'b',)
+
     a = models.ForeignKey(
         A, related_name='+', on_delete=models.CASCADE,
         db_constraint=False,

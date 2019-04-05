@@ -12,6 +12,8 @@ class B0(models.Model):
 
 
 class B1(AbstractDeleteRecord):
+    _save_check_fields = ('key',)
+
     key = models.IntegerField(unique=True)
 
     val = models.IntegerField(null=True)
@@ -49,6 +51,8 @@ class A0(models.Model):
 
 
 class A1(AbstractDeleteRecord):
+    _save_check_fields = ('key',)
+
     key = models.IntegerField(unique=True)
     b = models.ForeignKey(
         # read-write models should reference the outer-join model

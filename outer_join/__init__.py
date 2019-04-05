@@ -48,6 +48,7 @@ from .util.info import (
 from .util.queryset import (
     initial_queryset as _initial_queryset,
     QuerySetFilter as _QuerySetFilter,
+    QuerySetSplit as _QuerySetSplit,
 )
 from .util.typing import (
     T as _T,
@@ -461,75 +462,29 @@ class WritableOuterJoin(OuterJoin):
         class WritableOuterJoinQuerySet(queryset_class):
             def bulk_create(self, objs, batch_size=None):
                 # just create because if something's not in OUTER JOIN, it's not in writable table
-                clean_dicts = (
-                    rw.to_dict(obj, keep_none=False)
-                    for obj in objs
-                )
+                # Note: the `bulk_create` method may be customized in the writable table.
+                # See `AbstractDeleteRecord`.
                 write_objs = [
                     model(**d)
-                    for d in clean_dicts
+                    for d in rw.to_dicts(objs, keep_none=False)
                 ]
                 model._default_manager.bulk_create(write_objs, batch_size=batch_size)
                 return objs
 
-            @property
-            @_returns(set)
-            def rw_all_ids(self) -> set:
-                for item in self.values(*outer_join.on).iterator():
-                    yield rw.to_dict(item)
-
-            def rw_split(self) -> _typing.Tuple[set, set, set, _models.QuerySet]:
-                all_ids = self.rw_all_ids
-                existing_ids = set()
-                existing_pks = set()
-
-                existing_query = {
-                    f"{on}__in": {item[rw.get_field(name=on).column] for item in all_ids}
-                    for on in outer_join.on
-                }
-                existing: _models.QuerySet = model._default_manager.filter(**existing_query)
-                # here we only filtered fields individually
-                # next we need to match them against all fields
-                for obj in existing.iterator():
-                    obj_id = rw.to_dict(obj, fields=outer_join.on)
-                    if obj_id not in all_ids:
-                        continue
-                    existing_ids.add(obj_id)
-                    existing_pks.add(obj.pk)
-
-                new_ids = all_ids - existing_ids
-                existing_queryset = model._default_manager.filter(pk__in=existing_pks)
-
-                return all_ids, existing_ids, new_ids, existing_queryset
-
             def update(self, **kwargs):
-                # we need to know which ones exist in the writable table, and which ones don't
-                all_ids, existing_ids, new_ids, existing = self.rw_split()
-
-                existing.update(**kwargs)
-
-                model._default_manager.bulk_create([
-                    model(
-                        **obj_id,
-                        **kwargs,
-                    )
-                    for obj_id in new_ids
-                ])
-
+                split = _QuerySetSplit(self, rw, *outer_join.on)
+                split.get_existing_queryset().update(**kwargs)
+                split.bulk_create_new(**kwargs)
                 # clear cache
                 self._result_cache = None
 
             def delete(self):
-                new_ids = self.rw_split()[2]
-
-                model._default_manager.bulk_create([
-                    model(**obj_id)
-                    for obj_id in new_ids
-                ])
-
-                existing = self.rw_split()[3]
-                existing.delete()
-
+                split = _QuerySetSplit(self, rw, *outer_join.on)
+                split.bulk_create_new()
+                # now that new ones are created, we use split again to get the full queryset
+                split = _QuerySetSplit(self, rw, *outer_join.on)
+                split.get_existing_queryset().delete()
+                # clear cache
                 self._result_cache = None
 
         return WritableOuterJoinQuerySet

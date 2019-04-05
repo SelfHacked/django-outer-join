@@ -33,7 +33,7 @@ def test_qs_update():
     A.objects.get(key=1).b_set.update(val=1000)
     assert B.objects.get(key=4).val == 1000
     assert B0.objects.get(key=4).val == 10
-    assert B1.objects.get(key=4).val == 1000
+    assert B1._base_manager.get(key=4).val == 1000
 
 
 @pytest.mark.django_db
@@ -41,4 +41,4 @@ def test_qs_delete():
     A.objects.get(key=2).b_set.all().delete()
     assert not B.objects.filter(key=2).exists()
     assert B0.objects.filter(key=2).exists()
-    assert B1.objects.get(key=2).is_deleted is True
+    assert B1._base_manager.get(key=2).is_deleted is True
