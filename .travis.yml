@@ -24,7 +24,7 @@ before_script:
 
 script:
   - ./test-makemigrations.sh
-  - pytest --cov --cov-report term
+  - pytest --cov --cov-report term-missing:skip-covered
 
 after_success:
   - coveralls
