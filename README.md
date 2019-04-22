@@ -220,7 +220,7 @@ By default, the primary key will be a `-` joined string of all `on` field values
 The primary key should only be used in `SELECT` statements,
 and only exact lookup (`pk=` or `pk__exact=`) is supported.
 
-It will be populated however for objects selected through other other means.
+It will be populated however for objects selected through other means.
 
 ## Implementation Details
 
