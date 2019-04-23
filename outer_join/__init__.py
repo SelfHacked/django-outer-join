@@ -323,6 +323,18 @@ class OuterJoin(OuterJoinInterceptor):
                     'exact': result['exact'],
                 }
 
+            def deconstruct(self):
+                module = self.__class__.__module__
+                qualname = self.__class__.__qualname__
+                try:
+                    # use `path` from base class
+                    self.__class__.__module__ = base_class.__module__
+                    self.__class__.__qualname__ = base_class.__qualname__
+                    return super().deconstruct()
+                finally:
+                    self.__class__.__module__ = module
+                    self.__class__.__qualname__ = qualname
+
         return PKField
 
     @property
