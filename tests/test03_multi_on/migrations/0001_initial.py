@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='A',
             fields=[
+                ('primary_key', models.TextField(primary_key=True, serialize=False)),
             ],
             options={
                 'managed': False,

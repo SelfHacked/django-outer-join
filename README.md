@@ -222,6 +222,26 @@ and only exact lookup (`pk=` or `pk__exact=`) is supported.
 
 It will be populated however for objects selected through other means.
 
+### Special note for migrations
+
+Django will add a `CreateModel` for unmanaged models in migrations,
+but will not update them.
+If your unmanaged model does not have a manual primary key,
+you can ignore all the fields in the migration
+or even remove them (just use `fields=[]`).
+
+However, Django will still use the model specified in the migration
+to recreate the db state and decide what to do in dependent migrations.
+Thus, if there is a manual primary key referenced in other managed models,
+it must also be maintained manually in the migration history,
+so that any foreign key will have the correct type.
+See [this StackOverflow post](https://stackoverflow.com/a/54380461/3248736).
+
+If you are using the fake primary key above,
+you can use the base type in the migration, with `primary_key=True`.
+The default base type is `models.TextField`.
+See [test03/migrations/0001](tests/test03_multi_on/migrations/0001_initial.py).
+
 ## Implementation Details
 
 ### `SELECT` statement, without other `JOIN`s

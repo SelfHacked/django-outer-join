@@ -47,4 +47,13 @@ class A(models.Model):
         A1, A0,
         on=['key1', 'key2'],
     )
+    primary_key = outer_join.get_primary_key()()
     objects = outer_join.get_manager()()
+
+
+class B(models.Model):
+    a = models.ForeignKey(
+        A, related_name='b', on_delete=models.CASCADE,
+        to_field='primary_key',
+        db_constraint=False,
+    )
