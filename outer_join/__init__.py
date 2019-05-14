@@ -306,6 +306,14 @@ class OuterJoin(OuterJoinInterceptor):
                             for on in outer_join.on
                         ))
 
+                    @property
+                    def format(self):
+                        return field.format_pk
+
+                    @property
+                    def parse(self):
+                        return field.parse_pk
+
                 return PKDeferredAttribute
 
             def contribute_to_class(self, model, name, *args, **kwargs):
