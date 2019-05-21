@@ -91,6 +91,8 @@ class ModelInfo(object):
             return field
 
         if name is not None:
+            if name == 'pk':
+                return self.pk
             try:
                 return self.__field_name_to_field[name]
             except KeyError:
@@ -104,6 +106,10 @@ class ModelInfo(object):
     FieldValueDict = _typing.Mapping[str, _typing.Any]
     Object = _typing.Union[FieldValueDict, _models.Model]
 
+    @cached_property
+    def pk(self) -> 'FieldInfo':
+        return FieldInfo(self.meta.pk)
+
     @_returns(_ImmutableDict)
     def to_dict(
             self,
@@ -115,6 +121,12 @@ class ModelInfo(object):
     ) -> FieldValueDict:
         if isinstance(obj, _models.Model):
             obj = _model_to_dict(obj)
+
+        if fields is not None and 'pk' in fields:
+            fields = [
+                *fields,
+                self.pk.name,
+            ]
 
         for k, v in obj.items():
             if fields is not None and k not in fields:
