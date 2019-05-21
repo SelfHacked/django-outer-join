@@ -37,10 +37,12 @@ class AbstractDeleteRecord(_models.Model):
             using=None,
             update_fields=None,
     ):
-        if self._save_check_fields == ('pk',):
-            return
-        if self.pk is not None:
-            return
+        if not force_insert:
+            # if `force_insert=True`, we must check for existence
+            if self._save_check_fields == ('pk',):
+                return
+            if self.pk is not None:
+                return
 
         try:
             obj = self._model()._base_manager.get(
