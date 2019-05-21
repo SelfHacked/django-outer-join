@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'test06_fk_both',
     'test07_m2m_one',
     'test08_m2m_all',
+    'test09_readwrite_manual_pk',
 ]
 
 MIDDLEWARE = [
