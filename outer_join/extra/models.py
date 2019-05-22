@@ -37,21 +37,30 @@ class AbstractDeleteRecord(_models.Model):
             using=None,
             update_fields=None,
     ):
-        if not force_insert:
-            # if `force_insert=True`, we must check for existence
-            if self._save_check_fields == ('pk',):
-                return
-            if self.pk is not None:
-                return
+        pk_field_name = self._model_info().pk.name
+        pk_check = (
+                'pk' in self._save_check_fields or
+                pk_field_name in self._save_check_fields
+        )
+        if pk_check and len(self._save_check_fields) != 1:
+            raise ValueError('Cannot have pk and another field in _save_check_fields at the same time')
 
         try:
             obj = self._model()._base_manager.get(
                 **self._model_info().to_dict(self, fields=self._save_check_fields),
             )
         except self.DoesNotExist:
-            return
+            obj = None
+        else:
+            if obj.is_deleted:
+                obj._base_delete(using=using)
+                obj = None
 
-        obj._base_delete(using=using)
+        if not pk_check:
+            if obj is None:
+                self.pk = None
+            else:
+                self.pk = obj.pk
 
     def save(self, *args, **kwargs):
         self._pre_save(*args, **kwargs)
