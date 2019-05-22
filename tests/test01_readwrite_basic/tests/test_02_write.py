@@ -68,6 +68,8 @@ def test_save_a0():
     a.field3 = 9
     a.save()  # should create new record in A1
 
+    assert A1._base_manager.get(key=1).pk == 2  # should not delete pk=2
+
     assert A0.objects.get(key=2).field1 == 5  # not updated
     assert A1._base_manager.get(key=2).field1 == 7  # created with new value
 

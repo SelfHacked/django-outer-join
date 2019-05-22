@@ -1,6 +1,7 @@
 [
     {
         "model": "test01_readwrite_basic.a0",
+        "pk": 1,
         "fields": {
             "key": 1,
             "field1": 5,
@@ -9,6 +10,7 @@
     },
     {
         "model": "test01_readwrite_basic.a0",
+        "pk": 2,
         "fields": {
             "key": 2,
             "field1": 5,
@@ -17,6 +19,7 @@
     },
     {
         "model": "test01_readwrite_basic.a0",
+        "pk": 3,
         "fields": {
             "key": 4,
             "field1": 5,
@@ -25,6 +28,7 @@
     },
     {
         "model": "test01_readwrite_basic.a1",
+        "pk": 2,
         "fields": {
             "key": 1,
             "field1": 6,
@@ -33,6 +37,7 @@
     },
     {
         "model": "test01_readwrite_basic.a1",
+        "pk": 3,
         "fields": {
             "key": 3,
             "field1": 6,
@@ -41,6 +46,7 @@
     },
     {
         "model": "test01_readwrite_basic.a1",
+        "pk": 1,
         "fields": {
             "key": 4,
             "is_deleted": true
