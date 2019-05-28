@@ -114,7 +114,7 @@ class QuerySetSplit(object):
         # instead of {(a, b) in [(1, 1), (2, 2)]}
         # we first filter {a in [1, 2] and b in [1, 2]}
         query = {
-            f"{on}__in": {item[self.model_info.get_field(name=on).column] for item in self.all}
+            f"{on}__in": {item[self.model_info.get_field(name=on).attr] for item in self.all}
             for on in self.on
         }
         qs: _QuerySet = self.manager.filter(**query)
