@@ -302,7 +302,7 @@ class OuterJoin(OuterJoinInterceptor):
                         if instance is None:
                             return self
                         return field.format_pk((
-                            getattr(instance, outer_join.model.get_field(name=on).column)
+                            getattr(instance, outer_join.model.get_field(name=on).attr)
                             for on in outer_join.on
                         ))
 
