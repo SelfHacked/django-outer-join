@@ -2,7 +2,7 @@ import typing as _typing
 
 from gimme_cached_property import cached_property
 
-from .typing import (
+from outer_join.typing import (
     KT as _KT,
     VT_co as _VT_co,
 )

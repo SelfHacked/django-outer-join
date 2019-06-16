@@ -18,7 +18,7 @@ from returns import (
 from outer_join import (
     errors as _errors,
 )
-from ..datatypes import (
+from outer_join.util.datatypes import (
     ImmutableDict as _ImmutableDict,
 )
 

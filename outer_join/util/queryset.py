@@ -16,7 +16,7 @@ from returns import (
     returns as _returns,
 )
 
-from .info import (
+from outer_join.info import (
     ModelInfo as _ModelInfo,
 )
 

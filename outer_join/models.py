@@ -41,17 +41,17 @@ from outer_join.extra.fake_pk import (
     hyphen_join as _hyphen_join,
     hyphen_split as _hyphen_split,
 )
-from outer_join.util.info import (
+from outer_join.info import (
     ModelInfo as _ModelInfo,
     FieldInfo as _FieldInfo,
+)
+from outer_join.typing import (
+    T as _T,
 )
 from outer_join.util.queryset import (
     initial_queryset as _initial_queryset,
     QuerySetFilter as _QuerySetFilter,
     QuerySetSplit as _QuerySetSplit,
-)
-from outer_join.util.typing import (
-    T as _T,
 )
 
 

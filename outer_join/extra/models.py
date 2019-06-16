@@ -1,6 +1,6 @@
 import django.db.models as _models
 
-from outer_join.util.info import (
+from outer_join.info import (
     ModelInfo as _ModelInfo,
 )
 from outer_join.util.queryset import (
