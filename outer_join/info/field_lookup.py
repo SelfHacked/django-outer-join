@@ -1,12 +1,12 @@
-from gimme_cached_property import cached_property
 from returns import (
     returns as _returns,
 )
 
-from outer_join import (
-    errors as _errors,
+from outer_join.errors import (
+    FieldDoesNotExist as _FieldDoesNotExist,
 )
-from ..datatypes import (
+from outer_join.util import cached_property
+from outer_join.util.datatypes import (
     ImmutableDict as _ImmutableDict,
 )
 
@@ -44,7 +44,7 @@ class ModelFieldFinders(object):
             if result == self[name][val]:
                 continue
 
-            raise _errors.FieldDoesNotExist(**kwargs)
+            raise _FieldDoesNotExist(**kwargs)
 
         if result is None:
             raise ValueError('No lookup provided')
@@ -70,7 +70,7 @@ class AttributeModelFieldFinder(AbstractModelFieldFinder):
         try:
             return self._cache[val]
         except KeyError:
-            raise _errors.FieldDoesNotExist(**{self.attr: val})
+            raise _FieldDoesNotExist(**{self.attr: val})
 
 
 class NameModelFieldFinder(AttributeModelFieldFinder):

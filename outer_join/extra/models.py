@@ -1,16 +1,14 @@
-from django.db import (
-    models as _models,
-)
+import django.db.models as _models
 
-from .queryset import (
-    exclude_exact as _exclude_exact,
-)
-from ..util.info import (
+from outer_join.info import (
     ModelInfo as _ModelInfo,
 )
-from ..util.queryset import (
+from outer_join.util.queryset import (
     initial_queryset as _initial_queryset,
     QuerySetSplit as _QuerySetSplit,
+)
+from .queryset import (
+    exclude_exact as _exclude_exact,
 )
 
 

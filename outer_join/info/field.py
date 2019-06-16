@@ -2,7 +2,8 @@ import django.db.models as _models
 from django.db.models.expressions import (
     Col as _Col,
 )
-from gimme_cached_property import cached_property
+
+from outer_join.util import cached_property
 
 
 class FieldInfo(object):

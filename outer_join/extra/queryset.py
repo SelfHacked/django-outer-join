@@ -2,7 +2,7 @@ from django.db.models import (
     QuerySet as _QuerySet,
 )
 
-from ..util.queryset import (
+from outer_join.util.queryset import (
     QuerySetFilter as _QuerySetFilter,
 )
 
