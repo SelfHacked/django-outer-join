@@ -1,4 +1,4 @@
-from .util.info import (
+from outer_join.util.info import (
     ModelInfo as _ModelInfo,
 )
 

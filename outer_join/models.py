@@ -34,23 +34,23 @@ from returns import (
     returns as _returns,
 )
 
-from . import (
+from outer_join import (
     errors as _errors,
 )
-from .extra.fake_pk import (
+from outer_join.extra.fake_pk import (
     hyphen_join as _hyphen_join,
     hyphen_split as _hyphen_split,
 )
-from .util.info import (
+from outer_join.util.info import (
     ModelInfo as _ModelInfo,
     FieldInfo as _FieldInfo,
 )
-from .util.queryset import (
+from outer_join.util.queryset import (
     initial_queryset as _initial_queryset,
     QuerySetFilter as _QuerySetFilter,
     QuerySetSplit as _QuerySetSplit,
 )
-from .util.typing import (
+from outer_join.util.typing import (
     T as _T,
 )
 
