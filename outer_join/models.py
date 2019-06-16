@@ -34,8 +34,10 @@ from returns import (
     returns as _returns,
 )
 
-from outer_join import (
-    errors as _errors,
+from outer_join.errors import (
+    FieldDoesNotExist as _FieldDoesNotExist,
+    JoinFieldError as _JoinFieldError,
+    MultiplePKDeclared as _MultiplePKDeclared,
 )
 from outer_join.extra.fake_pk import (
     hyphen_join as _hyphen_join,
@@ -276,7 +278,7 @@ class OuterJoin(OuterJoinInterceptor):
                 return
             if outer_join.pk == field:
                 return
-            raise _errors.MultiplePKDeclared
+            raise _MultiplePKDeclared
 
         class PKField(base_class):
             def __init__(self, *args, **kwargs):
@@ -372,7 +374,7 @@ class OuterJoin(OuterJoinInterceptor):
         for model in self.base_models:
             try:
                 yield model.get_field(name=name)
-            except _errors.FieldDoesNotExist:
+            except _FieldDoesNotExist:
                 continue
 
     @cached_property
@@ -405,7 +407,7 @@ class OuterJoin(OuterJoinInterceptor):
                 name = field.name
                 fields = outer_join._get_fields(name)
                 if len(fields) == 0:
-                    raise _errors.JoinFieldError(outer_join.model, name)
+                    raise _JoinFieldError(outer_join.model, name)
 
                 if len(fields) == 1:
                     return super().compile(fields[0].col, select_format=select_format)

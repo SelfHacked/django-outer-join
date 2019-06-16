@@ -15,8 +15,8 @@ from returns import (
     returns as _returns,
 )
 
-from outer_join import (
-    errors as _errors,
+from outer_join.errors import (
+    FieldDoesNotExist as _FieldDoesNotExist,
 )
 from outer_join.util.datatypes import (
     ImmutableDict as _ImmutableDict,
@@ -113,7 +113,7 @@ class ModelInfo(object):
                 continue
             try:
                 field = self.get_field(name=k)
-            except _errors.FieldDoesNotExist:
+            except _FieldDoesNotExist:
                 if not raise_unknown_field:
                     continue
                 raise

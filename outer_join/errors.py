@@ -1,15 +1,10 @@
-from outer_join.info import (
-    ModelInfo as _ModelInfo,
-)
-
-
 class FieldDoesNotExist(Exception):
     def __init__(self, **kwargs):
         super().__init__(f"{self.__class__.__name__}: {kwargs}")
 
 
 class JoinFieldError(Exception):
-    def __init__(self, model: _ModelInfo, name: str):
+    def __init__(self, model: '_ModelInfo', name: str):
         msg = f"Field {model.raw.__name__}.{name} does not exist in any base model"
         super().__init__(msg)
         self.model = model
@@ -18,3 +13,8 @@ class JoinFieldError(Exception):
 
 class MultiplePKDeclared(Exception):
     pass
+
+
+from outer_join.info import (
+    ModelInfo as _ModelInfo,
+)
