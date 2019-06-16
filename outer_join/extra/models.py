@@ -1,6 +1,4 @@
-from django.db import (
-    models as _models,
-)
+import django.db.models as _models
 
 from .queryset import (
     exclude_exact as _exclude_exact,
