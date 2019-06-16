@@ -11,7 +11,6 @@ from django.db.models.manager import (
     BaseManager as _BaseManager,
     Manager as _Manager,
 )
-from gimme_cached_property import cached_property
 from returns import (
     returns as _returns,
 )
@@ -19,6 +18,7 @@ from returns import (
 from outer_join.info import (
     ModelInfo as _ModelInfo,
 )
+from . import cached_property
 
 QuerySetFilter = _typing.Callable[[_QuerySet], _QuerySet]
 

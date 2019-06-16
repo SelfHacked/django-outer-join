@@ -10,7 +10,6 @@ from django.db.models.options import (
 from django.forms import (
     model_to_dict as _model_to_dict,
 )
-from gimme_cached_property import cached_property
 from returns import (
     returns as _returns,
 )
@@ -18,6 +17,7 @@ from returns import (
 from outer_join.errors import (
     FieldDoesNotExist as _FieldDoesNotExist,
 )
+from outer_join.util import cached_property
 from outer_join.util.datatypes import (
     ImmutableDict as _ImmutableDict,
 )

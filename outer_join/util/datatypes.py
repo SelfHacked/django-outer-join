@@ -1,11 +1,10 @@
 import typing as _typing
 
-from gimme_cached_property import cached_property
-
 from outer_join.typing import (
     KT as _KT,
     VT_co as _VT_co,
 )
+from . import cached_property
 
 
 class ImmutableDict(_typing.Mapping[_KT, _VT_co]):

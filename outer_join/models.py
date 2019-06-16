@@ -29,7 +29,6 @@ from django.db.models.sql.datastructures import (
     BaseTable as _BaseTable,
     Join as _Join,
 )
-from gimme_cached_property import cached_property
 from returns import (
     returns as _returns,
 )
@@ -50,6 +49,7 @@ from outer_join.info import (
 from outer_join.typing import (
     T as _T,
 )
+from outer_join.util import cached_property
 from outer_join.util.queryset import (
     initial_queryset as _initial_queryset,
     QuerySetFilter as _QuerySetFilter,
