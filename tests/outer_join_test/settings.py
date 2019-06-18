@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'outer_join_test.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'outer_join.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'django_outer_join_test'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),

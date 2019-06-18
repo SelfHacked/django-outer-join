@@ -4,30 +4,8 @@ from functools import (
 )
 
 import django.db.models as _models
-from django.db import (
-    connections as _connections,
-)
-from django.db.models import (
-    Lookup as _Lookup,
-)
-from django.db.models.expressions import (
-    Col as _Col,
-)
-from django.db.models.lookups import (
-    Exact as _Exact,
-)
 from django.db.models.query_utils import (
     DeferredAttribute as _DeferredAttribute,
-)
-from django.db.models.sql import (
-    Query as _Query,
-)
-from django.db.models.sql.compiler import (
-    SQLCompiler as _SQLCompiler,
-)
-from django.db.models.sql.datastructures import (
-    BaseTable as _BaseTable,
-    Join as _Join,
 )
 from returns import (
     returns as _returns,
@@ -35,7 +13,6 @@ from returns import (
 
 from outer_join.errors import (
     FieldDoesNotExist as _FieldDoesNotExist,
-    JoinFieldError as _JoinFieldError,
     MultiplePKDeclared as _MultiplePKDeclared,
 )
 from outer_join.extra.fake_pk import (
@@ -92,94 +69,6 @@ class OuterJoinInterceptor(object):
     def contribute_to_class(self, model, *args, **kwargs):
         self.__model = _ModelInfo(model)
 
-    @cached_property
-    def _compiler_class(self) -> _typing.Type[_SQLCompiler]:
-        class SubquerySqlCompiler(_SQLCompiler):
-            def _compile_join(self, node: _Join, *, select_format):
-                left_instance = OuterJoin.get_instance(table_name=node.parent_alias)
-                right_instance = OuterJoin.get_instance(table_name=node.table_name)
-                if left_instance is None and right_instance is None:
-                    return super().compile(node, select_format=select_format)
-
-                params = []
-                sql = f'{node.join_type} '
-                if right_instance is not None:
-                    subquery = right_instance.model.raw._default_manager.all().query
-                    sql += f'({subquery}) AS '
-                sql += f'{node.table_name} ON ('
-
-                def __conditions(self, compiler):
-                    """Copied from Join.as_sql and modified according to left_instance"""
-
-                    join_conditions = []
-
-                    # Add a join condition for each pair of joining columns.
-                    for index, (lhs_col, rhs_col) in enumerate(self.join_cols):
-                        if left_instance is None:
-                            left = f'"{self.parent_alias}"."{lhs_col}"'
-                        else:
-                            left, lp = compiler._compile_col(
-                                left_instance.model.get_field(column=lhs_col).col,
-                                select_format=False,
-                            )
-                            params.extend(lp)
-                        right = f'"{self.table_alias}"."{rhs_col}"'
-                        join_conditions.append(f"{left} = {right}")
-
-                    # Add a single condition inside parentheses for whatever
-                    # get_extra_restriction() returns.
-                    extra_cond = self.join_field.get_extra_restriction(
-                        compiler.query.where_class, self.table_alias, self.parent_alias)
-                    if extra_cond:
-                        extra_sql, extra_params = compiler.compile(extra_cond)
-                        join_conditions.append('(%s)' % extra_sql)
-                        params.extend(extra_params)
-                    if self.filtered_relation:
-                        extra_sql, extra_params = compiler.compile(self.filtered_relation)
-                        if extra_sql:
-                            join_conditions.append('(%s)' % extra_sql)
-                            params.extend(extra_params)
-                    if not join_conditions:
-                        # This might be a rel on the other end of an actual declared field.
-                        declared_field = getattr(self.join_field, 'field', self.join_field)
-                        raise ValueError(
-                            "Join generated an empty ON clause. %s did not yield either "
-                            "joining columns or extra restrictions." % declared_field.__class__
-                        )
-                    return ' AND '.join(join_conditions)
-
-                sql += __conditions(node, self)
-                sql += ') '
-                return sql, params
-
-            def compile(self, node, select_format=False):
-                if isinstance(node, _Join):
-                    return self._compile_join(node, select_format=select_format)
-                return super().compile(node, select_format=select_format)
-
-        return SubquerySqlCompiler
-
-    @cached_property
-    def _query_class(self) -> _typing.Type[_Query]:
-        outer_join = self
-
-        class OuterJoinQuery(_Query):
-            def get_compiler(self, using=None, connection=None):
-                if using is None and connection is None:
-                    raise ValueError("Need either using or connection")
-                if using:
-                    connection = _connections[using]
-                return outer_join._compiler_class(
-                    self,
-                    connection,
-                    using,
-                )
-
-        return OuterJoinQuery
-
-    def _get_query(self, *args, **kwargs) -> _Query:
-        return self._query_class(self.model.raw, *args, **kwargs)
-
     @property
     def _queryset_class(self) -> _typing.Type[_models.QuerySet]:
         if self.__queryset_class is None:
@@ -204,16 +93,9 @@ class OuterJoinInterceptor(object):
         outer_join = self
         filter_initial_queryset = self._to_sequence(filter_initial_queryset, allow_none=True)
 
+        @_initial_queryset(*filter_initial_queryset)
         class OuterJoinModelManager(_models.Manager.from_queryset(outer_join._queryset_class)):
-            @_initial_queryset(*filter_initial_queryset)
-            def get_queryset(self):
-                queryset = self._queryset_class(
-                    query=outer_join._get_query(),
-                    model=self.model,
-                    using=self._db,
-                    hints=self._hints,
-                )
-                return queryset
+            pass
 
         return OuterJoinModelManager
 
@@ -358,7 +240,7 @@ class OuterJoin(OuterJoinInterceptor):
             self.__ALL.append(self)
 
     @cached_property
-    def _outer_join_from(self) -> str:
+    def outer_join_from(self) -> str:
         sql = f'"{self.first.table_name}"'
         for model in self.base_models[1:]:
             sql += f' FULL OUTER JOIN "{model.table_name}" ON ('
@@ -370,85 +252,12 @@ class OuterJoin(OuterJoinInterceptor):
         return sql
 
     @_returns(tuple)
-    def _get_fields(self, name: str) -> _typing.Sequence[_FieldInfo]:
+    def get_fields(self, name: str) -> _typing.Sequence[_FieldInfo]:
         for model in self.base_models:
             try:
                 yield model.get_field(name=name)
             except _FieldDoesNotExist:
                 continue
-
-    @cached_property
-    def _compiler_class(self) -> _typing.Type[_SQLCompiler]:
-        outer_join = self
-        base_class = super()._compiler_class
-
-        class OuterJoinSqlCompiler(base_class):
-            def get_default_columns(self, *args, **kwargs) -> _typing.List[_Col]:
-                result = super().get_default_columns(*args, **kwargs)
-                if outer_join.pk is not None:
-                    result = [
-                        col
-                        for col in result
-                        if outer_join.pk != col.field
-                    ]
-                return result
-
-            def _compile_base_table(self, node: _BaseTable, *, select_format):
-                if node.table_name != outer_join.model.table_name:
-                    return super().compile(node, select_format=select_format)
-
-                return outer_join._outer_join_from, []
-
-            def _compile_col(self, node: _Col, *, select_format):
-                field = node.target
-                if outer_join.model != field.model:
-                    return super().compile(node, select_format=select_format)
-
-                name = field.name
-                fields = outer_join._get_fields(name)
-                if len(fields) == 0:
-                    raise _JoinFieldError(outer_join.model, name)
-
-                if len(fields) == 1:
-                    return super().compile(fields[0].col, select_format=select_format)
-
-                sql = _FieldInfo.coalesce(*fields)
-                if select_format:
-                    sql += f' AS {outer_join.model.get_field(name=name).column}'
-                return sql, []
-
-            def _compile_lookup(self, node: _Lookup, *, select_format):
-                if outer_join.pk is None:
-                    return super().compile(node, select_format=select_format)
-                if not isinstance(node.lhs, _Col):
-                    return super().compile(node, select_format=select_format)
-
-                pk = outer_join.pk.raw
-                if node.lhs.field is not pk:
-                    return super().compile(node, select_format=select_format)
-
-                expand_lookup = []
-                expand_lookup_params = []
-                for on, val in zip(outer_join.on, pk.parse_pk(node.rhs)):
-                    exact = _Exact(
-                        outer_join.model.get_field(name=on).col,
-                        val,
-                    )
-                    sql, params = self.compile(exact)
-                    expand_lookup.append(sql)
-                    expand_lookup_params.extend(params)
-                return f"(({') AND ('.join(expand_lookup)}))", expand_lookup_params
-
-            def compile(self, node, select_format=False):
-                if isinstance(node, _BaseTable):
-                    return self._compile_base_table(node, select_format=select_format)
-                elif isinstance(node, _Col):
-                    return self._compile_col(node, select_format=select_format)
-                elif isinstance(node, _Lookup):
-                    return self._compile_lookup(node, select_format=select_format)
-                return super().compile(node, select_format=select_format)
-
-        return OuterJoinSqlCompiler
 
 
 class WritableOuterJoin(OuterJoin):
