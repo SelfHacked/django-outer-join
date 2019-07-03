@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
 
+from outer_join import __version__
+
 extra_test = [
     'pytest>=4',
-    'pytest-runner>=4',
     'pytest-cov>=2',
     'pytest-django>=3',
     'psycopg2',
@@ -15,8 +16,7 @@ extra_ci = extra_test + [
 
 setup(
     name='django-outer-join',
-
-    version='dev',
+    version=__version__,
 
     python_requires='>=3.6',
 
@@ -36,4 +36,23 @@ setup(
 
     url='https://github.com/SelfHacked/django-outer-join',
     author='SelfHacked',
+    author_email='zheng@selfdecode.com',
+
+    classifiers=[
+        'Intended Audience :: Developers',
+
+        'Development Status :: 3 - Alpha',
+
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+
+        'Framework :: Django',
+        'Framework :: Django :: 2.0',
+        'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.2',
+
+        'Topic :: Software Development :: Libraries',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 )
