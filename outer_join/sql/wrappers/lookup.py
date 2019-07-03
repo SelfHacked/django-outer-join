@@ -28,7 +28,7 @@ class LookupWrapper(_Wrapper[_Lookup]):
         expand_lookup_params = []
         for on, val in zip(compiler.outer_join.on, pk.parse_pk(self.wrapped.rhs)):
             exact = _Exact(
-                compiler.outer_join.model.get_field(name=on).col,
+                compiler.outer_join.model.get_field(name=on).col(),
                 val,
             )
             sql, params = compiler.compile(exact)

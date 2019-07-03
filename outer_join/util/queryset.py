@@ -11,13 +11,13 @@ from django.db.models.manager import (
     BaseManager as _BaseManager,
     Manager as _Manager,
 )
+from model_wrappers import (
+    ModelWrapper as _ModelInfo,
+)
 from returns import (
     returns as _returns,
 )
 
-from outer_join.info import (
-    ModelInfo as _ModelInfo,
-)
 from . import cached_property
 
 QuerySetFilter = _typing.Callable[[_QuerySet], _QuerySet]

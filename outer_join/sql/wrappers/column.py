@@ -25,9 +25,9 @@ class ColWrapper(_Wrapper[_Col]):
             raise _JoinFieldError(compiler.outer_join.model, name)
 
         if len(fields) == 1:
-            return compiler.compile(fields[0].col, select_format=select_format)
+            return compiler.compile(fields[0].col(), select_format=select_format)
 
-        coalesce = _Coalesce(*(field.col for field in fields))
+        coalesce = _Coalesce(*(field.col() for field in fields))
         sql, params = coalesce.as_sql(compiler, compiler.connection)
         if select_format:
             column = compiler.outer_join.model.get_field(name=name).column

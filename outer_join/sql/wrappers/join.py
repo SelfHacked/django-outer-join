@@ -26,7 +26,7 @@ class JoinWrapper(_Wrapper[_Join]):
                 left = f'"{self.wrapped.parent_alias}"."{lhs_col}"'
             else:
                 left, lp = compiler.compile(
-                    left_instance.model.get_field(column=lhs_col).col,
+                    left_instance.model.get_field(column=lhs_col).col(),
                     select_format=False,
                 )
                 params.extend(lp)

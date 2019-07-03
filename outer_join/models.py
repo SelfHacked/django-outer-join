@@ -7,21 +7,23 @@ import django.db.models as _models
 from django.db.models.query_utils import (
     DeferredAttribute as _DeferredAttribute,
 )
+from model_wrappers import (
+    ModelWrapper as _ModelInfo,
+    FieldWrapper as _FieldInfo,
+)
+from model_wrappers.errors import (
+    FieldDoesNotExist as _FieldDoesNotExist,
+)
 from returns import (
     returns as _returns,
 )
 
 from outer_join.errors import (
-    FieldDoesNotExist as _FieldDoesNotExist,
     MultiplePKDeclared as _MultiplePKDeclared,
 )
 from outer_join.extra.fake_pk import (
     hyphen_join as _hyphen_join,
     hyphen_split as _hyphen_split,
-)
-from outer_join.info import (
-    ModelInfo as _ModelInfo,
-    FieldInfo as _FieldInfo,
 )
 from outer_join.typing import (
     T as _T,

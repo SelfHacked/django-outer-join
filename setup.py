@@ -23,6 +23,7 @@ setup(
     install_requires=[
         'Django>=2',
         'returns-decorator',
+        'django-model-wrappers @ https://github.com/SelfHacked/django-model-wrappers/archive/master.zip',
     ],
 
     extras_require={

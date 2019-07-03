@@ -26,8 +26,8 @@ class OuterJoinBaseTable:
 
             on_sqls = []
             for on in self.outer_join.on:
-                sql1, param1 = first.get_field(name=on).col.as_sql(compiler, connection)
-                sql2, param2 = model.get_field(name=on).col.as_sql(compiler, connection)
+                sql1, param1 = first.get_field(name=on).col().as_sql(compiler, connection)
+                sql2, param2 = model.get_field(name=on).col().as_sql(compiler, connection)
                 on_sqls.append(f'{sql1} = {sql2}')
                 params.extend(param1)
                 params.extend(param2)

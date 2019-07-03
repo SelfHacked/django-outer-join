@@ -1,8 +1,8 @@
 import django.db.models as _models
-
-from outer_join.info import (
-    ModelInfo as _ModelInfo,
+from model_wrappers import (
+    ModelWrapper as _ModelInfo,
 )
+
 from outer_join.util.queryset import (
     initial_queryset as _initial_queryset,
     QuerySetSplit as _QuerySetSplit,
