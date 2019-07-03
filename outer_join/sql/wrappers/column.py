@@ -28,7 +28,7 @@ class ColWrapper(_Wrapper[_Col]):
             return compiler.compile(fields[0].col(), select_format=select_format)
 
         coalesce = _Coalesce(*(field.col() for field in fields))
-        sql, params = coalesce.as_sql(compiler, compiler.connection)
+        sql, params = compiler.compile(coalesce)
         if select_format:
             column = compiler.outer_join.model.get_field(name=name).column
             sql += f' AS {column}'

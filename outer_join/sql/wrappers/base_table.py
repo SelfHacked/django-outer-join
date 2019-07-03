@@ -26,8 +26,8 @@ class OuterJoinBaseTable:
 
             on_sqls = []
             for on in self.outer_join.on:
-                sql1, param1 = first.get_field(name=on).col().as_sql(compiler, connection)
-                sql2, param2 = model.get_field(name=on).col().as_sql(compiler, connection)
+                sql1, param1 = compiler.compile(first.get_field(name=on).col())
+                sql2, param2 = compiler.compile(model.get_field(name=on).col())
                 on_sqls.append(f'{sql1} = {sql2}')
                 params.extend(param1)
                 params.extend(param2)
@@ -43,4 +43,4 @@ class BaseTableWrapper(_Wrapper[_BaseTable]):
         if compiler.outer_join.model.table_name != self.wrapped.table_name:
             return super().compile(compiler, select_format=select_format)
 
-        return OuterJoinBaseTable(compiler.outer_join).as_sql(compiler, compiler.connection)
+        return compiler.compile(OuterJoinBaseTable(compiler.outer_join), select_format=select_format)
