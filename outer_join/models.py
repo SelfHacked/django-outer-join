@@ -239,18 +239,6 @@ class OuterJoin(OuterJoinInterceptor):
             # only store the first
             self.__ALL.append(self)
 
-    @cached_property
-    def outer_join_from(self) -> str:
-        sql = f'"{self.first.table_name}"'
-        for model in self.base_models[1:]:
-            sql += f' FULL OUTER JOIN "{model.table_name}" ON ('
-            sql += ' AND '.join(
-                f'{self.first.get_field(name=on).sql} = {model.get_field(name=on).sql}'
-                for on in self.on
-            )
-            sql += ')'
-        return sql
-
     @_returns(tuple)
     def get_fields(self, name: str) -> _typing.Sequence[_FieldInfo]:
         for model in self.base_models:

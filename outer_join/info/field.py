@@ -56,10 +56,6 @@ class FieldInfo(object):
         return self.raw.name
 
     @cached_property
-    def sql(self) -> str:
-        return f'"{self.model.table_name}"."{self.column}"'
-
-    @cached_property
     def is_fk(self) -> bool:
         return isinstance(self.raw, _models.ForeignKey)
 
