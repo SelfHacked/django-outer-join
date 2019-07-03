@@ -1,12 +1,12 @@
 from django.db.models.expressions import (
     Col as _Col,
 )
+from django.db.models.functions import (
+    Coalesce as _Coalesce,
+)
 
 from outer_join.errors import (
     JoinFieldError as _JoinFieldError,
-)
-from outer_join.info import (
-    FieldInfo as _FieldInfo,
 )
 from . import (
     Wrapper as _Wrapper,
@@ -27,7 +27,8 @@ class ColWrapper(_Wrapper[_Col]):
         if len(fields) == 1:
             return compiler.compile(fields[0].col, select_format=select_format)
 
-        sql = _FieldInfo.coalesce(*fields)
+        coalesce = _Coalesce(*(field.col for field in fields))
+        sql, params = coalesce.as_sql(compiler, compiler.connection)
         if select_format:
             column = compiler.outer_join.model.get_field(name=name).column
             sql += f' AS {column}'

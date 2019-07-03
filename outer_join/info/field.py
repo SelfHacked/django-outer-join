@@ -67,18 +67,5 @@ class FieldInfo(object):
     def col(self) -> _Col:
         return _Col(self.model.table_name, self.raw)
 
-    @staticmethod
-    def coalesce(
-            field: 'FieldInfo',  # at least one must be provided
-            *fields: 'FieldInfo',
-    ) -> str:
-        sql = 'COALESCE('
-        sql += ', '.join(
-            field.sql
-            for field in (field, *fields)
-        )
-        sql += ')'
-        return sql
-
 
 from .model import ModelInfo
