@@ -24,16 +24,16 @@ class LookupWrapper(_Wrapper[_Lookup]):
         if self.wrapped.lhs.field is not pk:
             return super().compile(compiler, select_format=select_format)
 
-        expand_lookup = []
-        expand_lookup_params = []
+        sqls = []
+        params = []
         for on, val in zip(compiler.outer_join.on, pk.parse_pk(self.wrapped.rhs)):
             exact = _Exact(
                 compiler.outer_join.model.get_field(name=on).col(),
                 val,
             )
-            sql, params = compiler.compile(exact)
-            expand_lookup.append(sql)
-            expand_lookup_params.extend(params)
+            sql, param = compiler.compile(exact)
+            sqls.append(sql)
+            params.extend(param)
 
-        expand_lookup_str = '(' + ') AND ('.join(expand_lookup) + ')'
-        return f"({expand_lookup_str})", expand_lookup_params
+        final_sql = '((' + ') AND ('.join(sqls) + '))'
+        return final_sql, params
